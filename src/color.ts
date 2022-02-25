@@ -1,4 +1,4 @@
-"use-strict"
+"use-strict";
 
 
 
@@ -9,52 +9,63 @@
  * @param {type} type 
  */
 function tc(value, type) {
-    if(!(typeof value == type)) throw new TypeError(`required type ${type} got ${typeof value}`);
-    return value
-}
-
-function ic(value, type) {
-    if(! value instanceof type) throw new TypeError(`required type ${type} got ${typeof value}`);
-    return value
-}
-
-function nc(value) {
-    if(isNaN(value)) return 0;
+    if (!(typeof value === type)) { throw new TypeError(`required type ${type} got ${typeof value}`); }
     return value;
 }
 
-function oc(options) {
+function ic(value: any, type: any) {
+    // file deepcode ignore OperatorPrecedence: a
+    if (!(value instanceof type)) { throw new TypeError(`required type ${type} got ${typeof value}`); }
+    return value;
+}
+
+function nc(value) {
+    if (isNaN(value)) { return 0; }
+    return value;
+}
+
+interface Options {
+    angle: number
+    results: number
+    alpha: number
+    baseDark: any
+    baseLight: any
+
+}
+
+function oc(options: Partial<Options>, asd?: any): Partial<Options> {
     const new_options = {
         angle: options ? (options.angle ? options.angle : 15) : 15,
         results: options ? (options.results ? options.results : 3) : 3,
-    }
-    return new_options
+    };
+    return new_options;
 }
 
 function clmp(value, max, min) {
-    if(min !== undefined && value < min) {
+    if (min !== undefined && value < min) {
         return min;
     }
-    if(value > max) {
+    if (value > max) {
         return max;
     }
     return value;
 }
 
-function shift(h, angle){
+function shift(h, angle) {
     h += angle;
-    while (h >= 360.0) h -= 360.0;
-    while (h < 0.0) h += 360.0;
+    while (h >= 360.0) { h -= 360.0; }
+    while (h < 0.0) { h += 360.0; }
     return h;
 }
 
 class Color {
 
-    
-    
-    #red;
-    #green;
-    #blue;
+
+
+    private red: number;
+    private green: number;
+    private blue: number;
+    alpha: number;
 
     //#region color names
 
@@ -155,7 +166,7 @@ class Color {
         static get LIMEGREEN() { return Color.fromHex("#32cd32"); }
         static get LINEN() { return Color.fromHex("#faf0e6"); }
         static get MAGENTA() { return Color.fromHex("#ff00ff"); }
-        static get FUCHSIA() { return Color.fromHex("#ff00ff"); }
+        // static get FUCHSIA() { return Color.fromHex("#ff00ff"); }
         static get MEDIUMAQUAMARINE() { return Color.fromHex("#66cdaa"); }
         static get MEDIUMBLUE() { return Color.fromHex("#0000cd"); }
         static get MEDIUMORCHID() { return Color.fromHex("#ba55d3"); }
@@ -208,20 +219,20 @@ class Color {
         static get WHITESMOKE() { return Color.fromHex("#f5f5f5"); }
         static get YELLOWGREEN() { return Color.fromHex("#9acd32"); }
         static get REBECCAPURPLE() { return Color.fromHex("#663399"); }
-        
-       
-    }
-    
+
+
+    };
+
     //#endregion color names
 
     //#region scheme
 
     getScheme(name, options) {
-        return Color.createScheme(this, name, options)
+        return Color.createScheme(this, name, options);
     }
 
     static getScheme(color, name, options) {
-        return Color.createScheme(color, name, options)
+        return Color.createScheme(color, name, options);
     }
 
     /**
@@ -230,7 +241,7 @@ class Color {
      * @param {Object} options 
      * @returns Color[]
      */
-    static monochromatic(color, options){
+    static monochromatic(color, options) {
         ic(color, Color);
         let results = oc(options).results || 3;
         let hsv = Color.toHsv(color);
@@ -258,14 +269,14 @@ class Color {
      * @param {Color} color 
      * @returns Color
      */
-    static complementary(color){
+    static complementary(color) {
         ic(color, Color);
         let hsl = Color.toHsl(color);
         let h = hsl.h,
             s = hsl.s,
             l = hsl.l;
-        
-        return Color.fromHsl(shift(h, 180), s, l)
+
+        return Color.fromHsl(shift(h, 180), s, l);
 
     }
 
@@ -279,19 +290,19 @@ class Color {
      * @param {Object} options
      * @returns Color[3]
      */
-    static splitComplementary(color, options){
+    static splitComplementary(color, options?) {
         ic(color, Color);
         let hsl = Color.toHsl(color);
         let angle = oc(options).angle || 15;
         let h = hsl.h,
             s = hsl.s,
             l = hsl.l;
-        
+
         const result = [
             color,
             Color.fromHsl(shift(h, 180 + angle), s, l),
             Color.fromHsl(shift(h, 180 - angle), s, l),
-        ]
+        ];
 
         return result;
 
@@ -307,7 +318,7 @@ class Color {
      * @param {Object} options
      * @returns Color[4]
     */
-    static doubleComplementary(color, options) {
+    static doubleComplementary(color, options?) {
         ic(color, Color);
         let hsl = Color.toHsl(color);
         let angle = oc(options).angle || 15;
@@ -319,12 +330,12 @@ class Color {
             Color.fromHsl(shift(h, 180), s, l),
             Color.fromHsl(shift(h, angle), s, l),
             Color.fromHsl(shift(h, 180 + angle), s, l),
-        ]
-        return result
+        ];
+        return result;
     }
 
     doubleComplementary(options) {
-        return Color.doubleComplementary(this, options)
+        return Color.doubleComplementary(this, options);
     }
 
     /**
@@ -338,18 +349,18 @@ class Color {
         let h = hsl.h,
             s = hsl.s,
             l = hsl.l;
-        const result = [ color ]
+        const result = [color];
 
         for (let i = 1; i < 4; i++) {
             h = shift(h, 90);
             result.push(Color.fromHsl(h, s, l));
         }
 
-        return result
+        return result;
     }
 
     square() {
-        return Color.square(this)
+        return Color.square(this);
     }
 
     /**
@@ -358,7 +369,7 @@ class Color {
      * @param {Object} options
      * @returns Color[4]
     */
-    static tetradic(color, options) {
+    static tetradic(color, options?) {
         ic(color, Color);
         let hsl = Color.toHsl(color);
         let angle = oc(options).angle;
@@ -366,15 +377,15 @@ class Color {
             s = hsl.s,
             l = hsl.l;
         return [
-            color, 
+            color,
             Color.fromHsl(shift(h, 180), s, l),
             Color.fromHsl(shift(h, 180 - angle), s, l),
             Color.fromHsl(shift(h, -angle), s, l)
-        ]
+        ];
     }
 
     tetradic(options) {
-        return Color.tetradic(this, options)
+        return Color.tetradic(this, options);
     }
 
 
@@ -390,14 +401,14 @@ class Color {
             s = hsl.s,
             l = hsl.l;
         return [
-            color, 
+            color,
             Color.fromHsl(shift(h, 120), s, l),
             Color.fromHsl(shift(h, 240), s, l)
-        ]
+        ];
     }
 
     triadic() {
-        return Color.triadic(this)
+        return Color.triadic(this);
     }
 
     /**
@@ -406,7 +417,7 @@ class Color {
      * @param {Object} options
      * @returns Color[3]
     */
-    static analogous(color, options) {
+    static analogous(color, options?) {
         ic(color, Color);
         let hsl = Color.toHsl(color);
         let angle = oc(options).angle;
@@ -414,23 +425,23 @@ class Color {
             s = hsl.s,
             l = hsl.l;
         return [
-            color, 
+            color,
             Color.fromHsl(shift(h, -angle), s, l),
             Color.fromHsl(shift(h, +angle), s, l)
-        ]
+        ];
     }
 
     analogous(options) {
-        return Color.analogous(this, options)
+        return Color.analogous(this, options);
     }
 
-    static materialPalette(color, options) {
+    static materialPalette(color, options?) {
         var opt = oc(options);
         var baseLight = opt.baseLight;
         var baseDark = opt.baseDark === "self" || !opt.baseDark ? this.multiply(color, color) : opt.baseDark;
 
         return {
-            "50":  Color.mix(baseLight, color, 10),
+            "50": Color.mix(baseLight, color, 10),
             "100": Color.mix(baseLight, color, 30),
             "200": Color.mix(baseLight, color, 50),
             "300": Color.mix(baseLight, color, 70),
@@ -453,7 +464,7 @@ class Color {
     }
 
 
-        
+
     /**
      * 
      * @param {Color} color 
@@ -461,7 +472,7 @@ class Color {
      * @param {object} options 
      * @returns 
      */
-    static createScheme(color, name, options){
+    static createScheme(color, name, options) {
         switch (name.toLowerCase()) {
             case "analogous":
             case "analog": return Color.analogous(color);
@@ -502,10 +513,10 @@ class Color {
      * @param {Number} b 
      */
     constructor(r, g, b) {
-        if( !(( 0 <= r && r <= 255 ) && ( 0 <= g && g <= 255 ) && ( 0 <= b && b <= 255 )) ) throw new Error('Color values out of bounds (0 - 255)')
-        this.#red = nc(tc(r, "number"));
-        this.#green = nc(tc(g, "number"));
-        this.#blue = nc(tc(b, "number"));
+        if (!((0 <= r && r <= 255) && (0 <= g && g <= 255) && (0 <= b && b <= 255))) { throw new Error('Color values out of bounds (0 - 255)'); };
+        this.red = nc(tc(r, "number"));
+        this.green = nc(tc(g, "number"));
+        this.blue = nc(tc(b, "number"));
         this.alpha = 1;
 
     }
@@ -519,7 +530,7 @@ class Color {
      */
     static saturate(color, amount) {
         oc(color, Color);
-        tc(amount, "number")
+        tc(amount, "number");
         let hsl = color.toHsl();
         let h = hsl.h;
         let s = clmp(hsl.s + amount, 100, 0);
@@ -543,7 +554,7 @@ class Color {
      */
     static desaturate(color, amount) {
         oc(color, Color);
-        tc(amount, "number")
+        tc(amount, "number");
         let hsl = color.toHsl();
         let h = hsl.h;
         let s = clmp(hsl.s - amount, 100, 0);
@@ -559,7 +570,7 @@ class Color {
     desaturate(amount) {
         return Color.desaturate(this, amount);
     }
-    
+
     /**
      * 
      * @param {Color} color 
@@ -582,7 +593,7 @@ class Color {
      * @param {Color} color 
      * @returns Color 
      */
-    static greyscale(color) {
+    static greyscale(color, value: number) {
         return Color.desaturate(color, 100);
     }
 
@@ -601,8 +612,8 @@ class Color {
      * @returns Color 
      */
     static lighten(color, amount) {
-        ic(color, Color)
-        tc(amount, "number")
+        ic(color, Color);
+        tc(amount, "number");
 
         const hsl = color.toHsl();
         let h = hsl.h;
@@ -612,8 +623,8 @@ class Color {
         return Color.fromHsl(h, s, l);
     }
     /** @param {Number} amount */
-    lighten(amount) { return Color.lighten(this, amount) }
-    
+    lighten(amount) { return Color.lighten(this, amount); }
+
     /**
      * 
      * @param {Color} color 
@@ -624,7 +635,7 @@ class Color {
         return Color.lighten(color, -amount);
     }
     /** @param { Number } amount */
-    darken(amount) { return Color.darken(this, amount) }
+    darken(amount) { return Color.darken(this, amount); }
 
 
     /**
@@ -635,7 +646,7 @@ class Color {
      */
     static brighten(color, amount) {
         let rgb = color.toRgb();
-        
+
         rgb.r = Math.max(0, Math.min(255, rgb.r - Math.round(255 * - (amount / 100))));
         rgb.g = Math.max(0, Math.min(255, rgb.g - Math.round(255 * - (amount / 100))));
         rgb.b = Math.max(0, Math.min(255, rgb.b - Math.round(255 * - (amount / 100))));
@@ -657,15 +668,15 @@ class Color {
     /** @param {Color} color @param {Number} angle  */
     static shiftHue(color, angle) {
         ic(color, Color);
-        tc(angle, Number)
+        tc(angle, Number);
         let { h, s, l } = color.toHsl();
-        h = shift(h, angle)
+        h = shift(h, angle);
         return Color.fromHsl(h, s, l);
     }
     /** @param {Number} angle */
-    shiftHue(angle) { return Color.shiftHue(this, angle) }
-    
-    
+    shiftHue(angle) { return Color.shiftHue(this, angle); }
+
+
 
     /** @param {Color} color1 @param {Color} color2  */
     static multiply(color1, color2) {
@@ -677,15 +688,15 @@ class Color {
         return Color.fromRgb((r1 * r2) / 255, (g1 * g2) / 255, (b1 * b2) / 255);
     }
     /** @param {Number} angle */
-    multiply(color) { return Color.multiply(this, color) }
-    
+    multiply(color) { return Color.multiply(this, color); }
+
 
     /** @param {Color} color1 @param {Color} color2 @param {Number} amount */
-    static mix(color1, color2, amount=50) {
+    static mix(color1, color2, amount = 50) {
         ic(color1, Color);
         ic(color1, Color);
-        tc(amount, "number")
-  
+        tc(amount, "number");
+
         const rgb1 = color1.toRgb();
         const rgb2 = color2.toRgb();
 
@@ -697,7 +708,7 @@ class Color {
 
         return Color.fromRgb(r, g, b);
     }
-    
+
 
     /** @param {Color} color1 @param {Color} color2 @param {Number} amount */
     mix(color, amount) {
@@ -705,18 +716,18 @@ class Color {
     }
 
     /** @param {Color} color1 @param {Color} color2 @param {Number} amount */
-    static lerp(color1, color2, t=0.5) {
+    static lerp(color1, color2, t = 0.5) {
         tc(t, "number");
         ic(color1, Color);
         ic(color2, Color);
         t = clmp(t, 1, 0);
         let rgb1 = color1.toRgb();
         let rgb2 = color2.toRgb();
-        
+
         let r1 = rgb1.r / 255;
         let g1 = rgb1.g / 255;
         let b1 = rgb1.b / 255;
-        
+
         let r2 = rgb2.r / 255;
         let g2 = rgb2.g / 255;
         let b2 = rgb2.b / 255;
@@ -738,14 +749,14 @@ class Color {
     static add(color1, color2) {
         ic(color1, Color);
         ic(color2, Color);
-        
+
         let rgb1 = color1.toRgb();
         let rgb2 = color2.toRgb();
-        
+
         let r1 = rgb1.r;
         let g1 = rgb1.g;
         let b1 = rgb1.b;
-        
+
         let r2 = rgb2.r;
         let g2 = rgb2.g;
         let b2 = rgb2.b;
@@ -754,12 +765,12 @@ class Color {
             Math.round((r1 + r2) / 2),
             Math.round((g1 + g2) / 2),
             Math.round((b1 + b2) / 2),
-        )
+        );
 
     }
-    
+
     /** @param {Color} color */
-    add(color)  {
+    add(color) {
         return Color.add(this, color);
     }
     //#endregion
@@ -773,37 +784,33 @@ class Color {
      * @returns Color
      */
     static fromHex(hex) {
-            if(!hex.match(/^#?(?:[0-9a-fA-F]{3}){1,2}$/i)) throw new Error('Invalid Hex code: "' + hex + '"');
-            let r="0x00";
-            let g="0x00";
-            let b="0x00";
-            if(hex.length == 4)
-            {
-                r = "0x" + hex[1] + hex[1];
-                g = "0x" + hex[2] + hex[2];
-                b = "0x" + hex[3] + hex[3];
-            }
-            else if (hex.length == 3) 
-            {
-                r = "0x" + hex[0] + hex[0];
-                g = "0x" + hex[1] + hex[1];
-                b = "0x" + hex[2] + hex[2];
-            }
-            else if(hex.length == 7)
-            {
-                r = "0x" + hex[1] + hex[2];
-                g = "0x" + hex[3] + hex[4];
-                b = "0x" + hex[5] + hex[6];
-            }
-            else if(hex.length == 6)
-            {
-                r = "0x" + hex[0] + hex[1];
-                g = "0x" + hex[2] + hex[3];
-                b = "0x" + hex[4] + hex[5];
-            }
-        
-            const color = new Color( parseInt(r, 16), parseInt(g, 16), parseInt(b, 16) );            
-            return color;
+        if (!hex.match(/^#?(?:[0-9a-fA-F]{3}){1,2}$/i)) { throw new Error('Invalid Hex code: "' + hex + '"'); }
+        let r = "0x00";
+        let g = "0x00";
+        let b = "0x00";
+        if (hex.length == 4) {
+            r = "0x" + hex[1] + hex[1];
+            g = "0x" + hex[2] + hex[2];
+            b = "0x" + hex[3] + hex[3];
+        }
+        else if (hex.length == 3) {
+            r = "0x" + hex[0] + hex[0];
+            g = "0x" + hex[1] + hex[1];
+            b = "0x" + hex[2] + hex[2];
+        }
+        else if (hex.length == 7) {
+            r = "0x" + hex[1] + hex[2];
+            g = "0x" + hex[3] + hex[4];
+            b = "0x" + hex[5] + hex[6];
+        }
+        else if (hex.length == 6) {
+            r = "0x" + hex[0] + hex[1];
+            g = "0x" + hex[2] + hex[3];
+            b = "0x" + hex[4] + hex[5];
+        }
+
+        const color = new Color(parseInt(r, 16), parseInt(g, 16), parseInt(b, 16));
+        return color;
 
     }
 
@@ -815,7 +822,7 @@ class Color {
      * @returns Color
      */
     static fromRgb(r, g, b) {
-        return new Color(r, g, b)
+        return new Color(r, g, b);
     }
 
     /**
@@ -826,22 +833,22 @@ class Color {
      * @returns Color
      */
     static fromHsl(hue, sat, lum) {
-        hue = tc(hue, "number")
-        sat = tc(sat, "number")
-        lum = tc(lum, "number")
-        if(!( 0 <= hue && hue <= 360 )) throw new Error('HSL color values out of range, hue (0 - 360)')
-        if(!( 0 <= sat && sat <= 100 )) throw new Error('HSL color values out of range, sat (0 - 100)')
-        if(!( 0 <= lum && lum <= 100 )) throw new Error('HSL color values out of range, lum (0 - 100)')
+        hue = tc(hue, "number");
+        sat = tc(sat, "number");
+        lum = tc(lum, "number");
+        if (!(0 <= hue && hue <= 360)) { throw new Error('HSL color values out of range, hue (0 - 360)'); };
+        if (!(0 <= sat && sat <= 100)) { throw new Error('HSL color values out of range, sat (0 - 100)'); };
+        if (!(0 <= lum && lum <= 100)) { throw new Error('HSL color values out of range, lum (0 - 100)'); };
 
         sat /= 100;
         lum /= 100;
 
         let c = (1 - Math.abs(2 * lum - 1)) * sat;
         let x = c * (1 - Math.abs((hue / 60) % 2 - 1));
-        let m = lum - c/2;
-        let r=0;
-        let g=0;
-        let b=0;
+        let m = lum - c / 2;
+        let r = 0;
+        let g = 0;
+        let b = 0;
 
         if (0 <= hue && hue < 60) {
             r = c; g = x; b = 0;
@@ -856,13 +863,13 @@ class Color {
         } else if (300 <= hue && hue <= 360) {
             r = c; g = 0; b = x;
         }
-        
-        const red   = Math.round((r + m) * 255);
+
+        const red = Math.round((r + m) * 255);
         const green = Math.round((g + m) * 255);
-        const blue  = Math.round((b + m) * 255);
+        const blue = Math.round((b + m) * 255);
 
         const color = new Color(red, green, blue);
-        
+
         return color;
     }
 
@@ -874,69 +881,63 @@ class Color {
      * @returns Color
      */
     static fromHsv(hue, sat, val) {
-        hue = tc(hue, "number")
-        sat = tc(sat, "number")
-        val = tc(val, "number")
-        if(!( 0 <= hue && hue <= 360 )) throw new Error('HSL color values out of range, hue (0 - 360)')
-        if(!( 0 <= sat && sat <= 100 )) throw new Error('HSL color values out of range, sat (0 - 100)')
-        if(!( 0 <= val && val <= 100 )) throw new Error('HSL color values out of range, lum (0 - 100)')
+        hue = tc(hue, "number");
+        sat = tc(sat, "number");
+        val = tc(val, "number");
+        if (!(0 <= hue && hue <= 360)) { throw new Error('HSL color values out of range, hue (0 - 360)'); };
+        if (!(0 <= sat && sat <= 100)) { throw new Error('HSL color values out of range, sat (0 - 100)'); };
+        if (!(0 <= val && val <= 100)) { throw new Error('HSL color values out of range, lum (0 - 100)'); };
 
         sat /= 100;
         val /= 100;
         let c = val * sat;
-        let x = c * ( 1 - Math.abs( (hue/60) % 2 - 1 ) );
+        let x = c * (1 - Math.abs((hue / 60) % 2 - 1));
         let m = val - c;
 
-        let r=0;
-        let g=0;
-        let b=0;
+        let r = 0;
+        let g = 0;
+        let b = 0;
 
-        if(0 <= hue  && hue  < 60)
-        {
+        if (0 <= hue && hue < 60) {
             r = c;
             g = x;
             b = 0;
         }
-        
-        else if(60 <= hue  && hue < 120)
-        {
+
+        else if (60 <= hue && hue < 120) {
             r = x;
             g = c;
             b = 0;
         }
-        
-        else if(120 <= hue  && hue  < 180)
-        {
+
+        else if (120 <= hue && hue < 180) {
             r = 0;
             g = c;
             b = x;
         }
-        
-        else if(180 <= hue  && hue  < 240)
-        {
+
+        else if (180 <= hue && hue < 240) {
             r = 0;
             g = x;
             b = c;
         }
-        
-        else if(240 <= hue  && hue  < 300)
-        {
+
+        else if (240 <= hue && hue < 300) {
             r = x;
             g = 0;
             b = c;
         }
-        
-        else if(300 <= hue  && hue  <= 360)
-        {
+
+        else if (300 <= hue && hue <= 360) {
             r = c;
             g = 0;
             b = x;
         }
 
-        const red   = ((r + m) * 255);
+        const red = ((r + m) * 255);
         const green = ((g + m) * 255);
-        const blue  = ((b + m) * 255);
-        
+        const blue = ((b + m) * 255);
+
         const color = new Color(red, green, blue);
 
         return color;
@@ -949,11 +950,11 @@ class Color {
      * @returns Color 
      */
     static fromCssString(colorString) {
-        tc(colorString, "string")
+        tc(colorString, "string");
         var ctx = document.createElement("canvas").getContext("2d");
         ctx.fillStyle = colorString;
         const value = ctx.fillStyle;
-        if(!value) throw new Error("Invalid Color string");
+        if (!value) { throw new Error("Invalid Color string"); }
         return Color.fromHex(value);
     }
 
@@ -963,9 +964,9 @@ class Color {
      * @returns {ThisType} 
      */
     static fromName(colorName) {
-        colorName = tc(colorName, "string")
-        const color =  this.Colors[colorName.toUpperCase()];
-        if(!color) throw new Error('Invalid Color name');
+        colorName = tc(colorName, "string");
+        const color = this.Colors[colorName.toUpperCase()];
+        if (!color) { throw new Error('Invalid Color name'); }
         return color;
     }
 
@@ -985,18 +986,18 @@ class Color {
      */
     static toHex(color) {
         color = ic(color, Color);
-        let r = Math.round(color.#red).toString(16);
-        let g = Math.round(color.#green).toString(16);
-        let b = Math.round(color.#blue).toString(16);
+        let r = Math.round(color.red).toString(16);
+        let g = Math.round(color.green).toString(16);
+        let b = Math.round(color.blue).toString(16);
 
-        if (r.length == 1){
+        if (r.length == 1) {
             r = "0" + r;
         }
-        if (g.length == 1){
+        if (g.length == 1) {
             g = "0" + g;
         }
-        if (b.length == 1){
-            b = "0" + b;   
+        if (b.length == 1) {
+            b = "0" + b;
         }
 
 
@@ -1015,50 +1016,45 @@ class Color {
         let s = 0;
         let l = 0;
 
-        let r = color.#red / 255;
-        let g = color.#green / 255;
-        let b = color.#blue / 255;
+        let r = color.red / 255;
+        let g = color.green / 255;
+        let b = color.blue / 255;
 
         let cmin = Math.min(Math.min(r, g), b);
         let cmax = Math.max(Math.max(r, g), b);
         let delta = cmax - cmin;
 
-        if (delta === 0)
-        {
+        if (delta === 0) {
             h = 0;
         }
-        
-        else if (cmax === r)
-        {
+
+        else if (cmax === r) {
             h = ((g - b) / delta) % 6;
         }
 
-        else if (cmax === g)
-        {
+        else if (cmax === g) {
             h = (b - r) / delta + 2;
         }
 
-        else
-        {
+        else {
             h = (r - g) / delta + 4;
         }
-  
+
         h = Math.round(h * 60);
-  
-        if (h < 0)
-        {
-            h += 360;  
+
+        if (h < 0) {
+            h += 360;
         }
 
         l = (cmax + cmin) / 2;
         s = delta === 0 ? 0 : delta / (1 - Math.abs(2 * l - 1));
-        s = parseFloat(Math.abs(s * 100));
-        l = parseFloat(Math.abs(l * 100));
+        s = Math.abs(s * 100);
+        l = Math.abs(l * 100);
 
-        return { h:nc(h), s:nc(s), l:nc(l) };
+        return { h: nc(h), s: nc(s), l: nc(l) };
 
     }
-    
+
 
 
     /**
@@ -1076,52 +1072,46 @@ class Color {
         let s = 0;
         let v = 0;
 
-        let r = color.#red / 255;
-        let g = color.#green / 255;
-        let b = color.#blue / 255;
+        let r = color.red / 255;
+        let g = color.green / 255;
+        let b = color.blue / 255;
 
         let cmin = Math.min(Math.min(r, g), b);
         let cmax = Math.max(Math.max(r, g), b);
         let delta = cmax - cmin;
 
-        if (delta === 0)
-        {
+        if (delta === 0) {
             h = 0;
         }
-        
-        else if (cmax === r)
-        {
+
+        else if (cmax === r) {
             h = ((g - b) / delta) % 6;
         }
 
-        else if (cmax === g)
-        {
+        else if (cmax === g) {
             h = (b - r) / delta + 2;
         }
 
-        else
-        {
+        else {
             h = (r - g) / delta + 4;
         }
-  
+
         h = Math.round(h * 60);
-  
-        if (h < 0)
-        {
-            h += 360;  
+
+        if (h < 0) {
+            h += 360;
         }
 
-        if(cmax !== 0) 
-        {
-            s = (delta/cmax) * 100;
+        if (cmax !== 0) {
+            s = (delta / cmax) * 100;
         }
 
         v = cmax * 100;
-        return { h:nc(h), s:nc(s), v:nc(v) }; 
+        return { h: nc(h), s: nc(s), v: nc(v) };
 
     }
-    
-    
+
+
     /**
      * @typedef {Object} rgb
      * @property {Number} r - red
@@ -1135,9 +1125,9 @@ class Color {
      */
     static toRgb(color) {
         ic(color, Color);
-        return { r: color.#red, g: color.#green, b: color.#blue };
+        return { r: color.red, g: color.green, b: color.blue };
     }
-    
+
     /**
      * @typedef {Object} cmyk
      * @property {Number} c - cyan
@@ -1157,11 +1147,11 @@ class Color {
         let m = 1 - (g / 255);
         let y = 1 - (b / 255);
         let k = Math.min(c, Math.min(m, y));
-        
+
         c = (c - k) / (1 - k);
         m = (m - k) / (1 - k);
         y = (y - k) / (1 - k);
-        
+
         c = nc(Math.round(c * 10000) / 100);
         m = nc(Math.round(m * 10000) / 100);
         y = nc(Math.round(y * 10000) / 100);
@@ -1215,55 +1205,55 @@ class Color {
         return Color.toCmyk(this);
     }
 
-    
+
 
     //#endregion
 
     static random() {
-        const r = Math.floor(Math.random() * 255)
-        const g = Math.floor(Math.random() * 255) 
-        const b = Math.floor(Math.random() * 255)
-        return new Color(r,g,b)
+        const r = Math.floor(Math.random() * 255);
+        const g = Math.floor(Math.random() * 255);
+        const b = Math.floor(Math.random() * 255);
+        return new Color(r, g, b);
     }
 
-    toString(type="hex") {
+    toString(type = "hex") {
         tc(type, "string");
         const rgb = this.toRgb();
         const hsl = this.toHsl();
-        switch(type.toLowerCase()) {
+        switch (type.toLowerCase()) {
             case "hex":
                 return this.toHex();
-                
+
             case "hexa":
                 let a = Math.round(this.alpha * 255).toString(16);
-                if(a.length === 1) { a = "0" + a; };
+                if (a.length === 1) { a = "0" + a; };
                 return this.toHex() + a;
-                
+
             case "rgb":
-                return `rgb(${Math.round(rgb.r)}, ${Math.round(rgb.g)}, ${Math.round(rgb.b)})` ;
-                
-                
+                return `rgb(${Math.round(rgb.r)}, ${Math.round(rgb.g)}, ${Math.round(rgb.b)})`;
+
+
             case "rgba":
-                return `rgba(${Math.round(rgb.r)}, ${Math.round(rgb.g)}, ${Math.round(rgb.b)}, ${this.alpha})` ;
-                
+                return `rgba(${Math.round(rgb.r)}, ${Math.round(rgb.g)}, ${Math.round(rgb.b)}, ${this.alpha})`;
+
             case "hsl":
-                return `hsl(${Math.round(hsl.h)}, ${Math.round(hsl.s)}%, ${Math.round(hsl.l)}%)` ;
-                
-                
+                return `hsl(${Math.round(hsl.h)}, ${Math.round(hsl.s)}%, ${Math.round(hsl.l)}%)`;
+
+
             case "hsla":
-                return `hsla(${Math.round(hsl.h)}, ${Math.round(hsl.s)}%, ${Math.round(hsl.l)}%, ${this.alpha})` ;
-                
+                return `hsla(${Math.round(hsl.h)}, ${Math.round(hsl.s)}%, ${Math.round(hsl.l)}%, ${this.alpha})`;
+
             case "hsv":
                 const hsv = this.toHsv();
-                return `hsv(${Math.round(hsv.h)}, ${Math.round(hsv.s)}%, ${Math.round(hsv.v)}%)` ;
-        
+                return `hsv(${Math.round(hsv.h)}, ${Math.round(hsv.s)}%, ${Math.round(hsv.v)}%)`;
+
             case "cmyk":
                 const cmyk = this.toCmyk();
-                return `cmyk(${Math.round(cmyk.c)}%, ${Math.round(cmyk.m)}%, ${Math.round(cmyk.y)}%, ${Math.round(cmyk.k)}%)` ;
-            
+                return `cmyk(${Math.round(cmyk.c)}%, ${Math.round(cmyk.m)}%, ${Math.round(cmyk.y)}%, ${Math.round(cmyk.k)}%)`;
+
             default:
                 "Can't convert Color to given string type";
-        
+
         }
     }
 

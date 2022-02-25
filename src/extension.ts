@@ -10,17 +10,17 @@ interface Match {
 }
 
 function parseColorString(color: string) {
-	
+
 	try {
 		const p = parse(color);
-		if(!p) { throw new Error('invalid color string'); }
-		if(p.type === "rgb") {
+		if (!p) { throw new Error('invalid color string'); }
+		if (p.type === "rgb") {
 			const r = p.values[0] as number;
 			const g = p.values[1] as number;
 			const b = p.values[2] as number;
 			const a = p.alpha as number;
-	
-			return new vscode.Color(r/255, g/255, b/255, a);
+
+			return new vscode.Color(r / 255, g / 255, b / 255, a);
 		} else {
 			const h = p.values[0] as number;
 			const s = p.values[1] as number;
@@ -28,10 +28,10 @@ function parseColorString(color: string) {
 			const a = p.alpha as number;
 			const { r, g, b } = Color.fromHsl(h, s, l).toRgb();
 
-			return new vscode.Color(r/255, g/255, b/255, a);
+			return new vscode.Color(r / 255, g / 255, b / 255, a);
 		}
 
-	} catch(e) {
+	} catch (e) {
 		console.log(e);
 		return null;
 	}
@@ -40,13 +40,13 @@ function parseColorString(color: string) {
 
 
 function getPos(text: string, index: number): vscode.Position {
-	
+
 	const nMatches = Array.from(text.slice(0, index).matchAll(/\n/g));
 
 	const lineNumber = nMatches.length;
 
-	const characterIndex = index - nMatches[lineNumber-1].index;
-	
+	const characterIndex = index - nMatches[lineNumber - 1].index;
+
 
 	return new vscode.Position(
 		lineNumber,
@@ -56,29 +56,30 @@ function getPos(text: string, index: number): vscode.Position {
 
 
 class Matcher {
-	
-	
+
+
 	static getMatches(text: string): Match[] {
-		const matches = text.matchAll(/(#(?:[\da-f]{3,4}){2}|rgb\((?:\d{1,3},\s*){2}\d{1,3}\)|rgba\((?:\d{1,3},\s*){3}\d*\.?\d+\)|hsl\(\d{1,3}(?:,\s*\d{1,3}%){2}\)|hsla\(\d{1,3}(?:,\s*\d{1,3}%){2},\s*\d*\.?\d+\))/gi);
+		const matches = text.matchAll(/(#(?:[\da-f]{3})\b|#(?:[\da-f]{6})\b|#(?:[\da-f]{9})\b|rgb\(\s*(?:\d{1,3}\s*,\s*){2}\d{1,3}\s*\)|rgba\(\s*(?:\d{1,3}\s*,\s*){3}\d*\.?\d+\s*\)|hsl\(\s*\d{1,3}(?:\s*(?:,|\s)\s*\d{1,3}%){2}\s*\)|hsla\(\s*\d{1,3}(?:\s*(?:,|\s)\s*\d{1,3}%){2}(?:,|\s)\s*\d*\.?\d+\s*\))/gi);
 		return Array.from(matches).map(match => {
 			const t = match[0];
+			console.log({ mytype: t });
 			const length = t.length;
 			let type: string;
-				if(t.startsWith('hsl(')) { type = "hsl"; }
-				else if(t.startsWith('hsla(')) { type = "hsla"; }
-				else if(t.startsWith('rgb(')) { type = "rgb"; }
-				else if(t.startsWith('rgba(')) { type = "rgba"; }
-				else if(t.startsWith('#')) { type = "hex"; }
+			if (t.startsWith('hsl(')) { type = "hsl"; }
+			else if (t.startsWith('hsla(')) { type = "hsla"; }
+			else if (t.startsWith('rgb(')) { type = "rgb"; }
+			else if (t.startsWith('rgba(')) { type = "rgba"; }
+			else if (t.startsWith('#')) { ; type = "hex"; }
 
 			const range = new vscode.Range(
 				getPos(text, match.index),
 				getPos(text, match.index + t.length)
 			);
 
-			const col = parseColorString(t); 
-			
+			const col = parseColorString(t);
 
-			if(col) {
+
+			if (col) {
 				return {
 					color: col,
 					type,
@@ -89,7 +90,7 @@ class Matcher {
 		});
 
 
-		
+
 	}
 }
 
@@ -99,8 +100,8 @@ class Picker {
 
 	constructor() {
 		let subscriptions: vscode.Disposable[] = [];
-        vscode.workspace.onDidChangeTextDocument(this._onDidChangeTextDocument, this, subscriptions);
-        vscode.workspace.onDidChangeConfiguration(this._onDidChangeConfiguration, this, subscriptions);
+		vscode.workspace.onDidChangeTextDocument(this._onDidChangeTextDocument, this, subscriptions);
+		vscode.workspace.onDidChangeConfiguration(this._onDidChangeConfiguration, this, subscriptions);
 		this.register();
 	}
 
@@ -109,11 +110,11 @@ class Picker {
 		return vscode.workspace.getConfiguration('vscode-color-picker').get('languages') as Array<string>;
 	}
 
-    private _onDidChangeTextDocument(e: vscode.TextDocumentChangeEvent) {
+	private _onDidChangeTextDocument(e: vscode.TextDocumentChangeEvent) {
 		const editor = vscode.window.activeTextEditor;
 		const document = e.document;
 		const text = document.getText();
-    }
+	}
 
 	private _onDidChangeConfiguration() {
 
@@ -121,16 +122,16 @@ class Picker {
 
 	private register() {
 		this.languages.forEach(language => {
+			console.log(language);
 			vscode.languages.registerColorProvider(language, {
-
 				provideDocumentColors(document: vscode.TextDocument, token: vscode.CancellationToken) {
-					
+
 					const matches = Matcher.getMatches(document.getText());
-					
-					return matches.map((match, i,) =>  new vscode.ColorInformation(
-							match.range,
-							match.color
-						));
+					console.log({ text: document.getText() });
+					return matches.map((match, i,) => new vscode.ColorInformation(
+						match.range,
+						match.color
+					));
 
 				},
 				provideColorPresentations(color, context, token) {
@@ -150,16 +151,16 @@ class Picker {
 					const presentationRgba = new vscode.ColorPresentation(c.toString('rgba'));
 
 					let hasAlpha = false;
-					if(t.startsWith('#') && (t.length === 9)) {
+					if (t.startsWith('#') && (t.length === 9)) {
 						hasAlpha = true;
 					}
-					if(t.startsWith('hsla')) {
+					if (t.startsWith('hsla')) {
 						hasAlpha = true;
 					}
-					if(t.startsWith('rgba')) {
+					if (t.startsWith('rgba')) {
 						hasAlpha = true;
 					}
-					if(color.alpha !== 1) {
+					if (color.alpha !== 1) {
 						hasAlpha = true;
 					}
 
@@ -195,7 +196,7 @@ class Picker {
 
 
 
-	dispose() {}
+	dispose() { }
 }
 
 
@@ -203,7 +204,8 @@ class Picker {
 export function activate(context: vscode.ExtensionContext) {
 	const picker = new Picker();
 	context.subscriptions.push(picker);
+	console.log("active");
 }
 
 // this method is called when your extension is deactivated
-export function deactivate() {}
+export function deactivate() { }
