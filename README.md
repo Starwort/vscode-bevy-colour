@@ -2,7 +2,7 @@
 
 A simple Color picker for vscode that lets you use vscode's css color picker in other documents
 
-![color-picker-preview](https://i.imgur.com/dG1tnN3.png, "color-picker-preview")
+![color-picker-preview](https://github.com/Markos-Th09/vscode-color-picker/raw/main/showcase.png "color-picker-preview")
 
 * To make it work for your preferred language, just add a `vscode-color-picker.languages` entry in settings.json, with VSCode's identifier string for the language, in the list. For ex.
   ```json
