@@ -1,14 +1,92 @@
 "use-strict";
 
+interface SchemeOptions {
+    angle: number
+    results: number
+    alpha: number
+    baseDark: string
+    baseLight: string
+}
+interface MonochromeOptions extends SchemeOptions {
+    /** results - Number of results to return. 
+     * Min - 3
+     * Default - 3
+    */
+    results: number;
+}
 
+interface SplitComplementaryOptions extends SchemeOptions {
+    /** angle - angle to shift hue by for calculating the return colors.
+     * Range - [ 0 - 360 ]
+    */
+    angle: number;
+}
 
+interface DoubleComplementaryOptions extends SchemeOptions {
+    /** angle - angle to shift hue by for calculating the return colors.
+     * Range - [ 0 - 360 ]
+    */
+    angle: number;
+}
+
+interface TetradicOptions extends SchemeOptions {
+    /** angle - angle to shift hue by for calculating the return colors.
+     * Range - [ 0 - 360 ]
+    */
+    angle: number;
+}
+
+interface AnalogousOptions extends SchemeOptions {
+    /** angle - angle to shift hue by for calculating the return colors.
+     * Range - [ 0 - 360 ]
+    */
+    angle: number;
+}
+
+interface HSL {
+    /** hue */
+    h: number;
+    /** saturation */
+    s: number;
+    /** luminance */
+    l: number;
+}
+
+interface HSV {
+    /** hue */
+    h: number;
+    /** saturation */
+    s: number;
+    /** value */
+    v: number;
+}
+
+interface RGB {
+    /** red */
+    r: number;
+    /** green */
+    g: number;
+    /** blue */
+    b: number;
+}
+
+interface CMYK {
+    /** cyan */
+    c: number;
+    /** magenta */
+    m: number;
+    /** yellow */
+    y: number;
+    /** black */
+    k: number;
+}
 
 /**
  * 
  * @param {Any} value 
  * @param {type} type 
  */
-function tc(value, type) {
+function tc(value: any, type: any) {
     if (!(typeof value === type)) { throw new TypeError(`required type ${type} got ${typeof value}`); }
     return value;
 }
@@ -19,29 +97,20 @@ function ic(value: any, type: any) {
     return value;
 }
 
-function nc(value) {
+function nc(value: number) {
     if (isNaN(value)) { return 0; }
     return value;
 }
 
-interface Options {
-    angle: number
-    results: number
-    alpha: number
-    baseDark: any
-    baseLight: any
-
-}
-
-function oc(options: Partial<Options>, asd?: any): Partial<Options> {
-    const new_options = {
+function oc(options: Partial<SchemeOptions>, value?: any): Partial<SchemeOptions> {
+    const newOptions = {
         angle: options ? (options.angle ? options.angle : 15) : 15,
         results: options ? (options.results ? options.results : 3) : 3,
     };
-    return new_options;
+    return newOptions;
 }
 
-function clmp(value, max, min) {
+function clmp(value: number, max: number, min: number) {
     if (min !== undefined && value < min) {
         return min;
     }
@@ -51,7 +120,7 @@ function clmp(value, max, min) {
     return value;
 }
 
-function shift(h, angle) {
+function shift(h: number, angle: number) {
     h += angle;
     while (h >= 360.0) { h -= 360.0; }
     while (h < 0.0) { h += 360.0; }
@@ -59,13 +128,26 @@ function shift(h, angle) {
 }
 
 class Color {
-
+    "50": Color;
+    "100": Color;
+    "200": Color;
+    "300": Color;
+    "400": Color;
+    "500": Color;
+    "600": Color;
+    "700": Color;
+    "800": Color;
+    "900": Color;
+    "A100": Color;
+    "A200": Color;
+    "A400": Color;
+    "A700": Color;
 
 
     private red: number;
     private green: number;
     private blue: number;
-    alpha: number;
+    public alpha: number;
 
     //#region color names
 
@@ -227,11 +309,11 @@ class Color {
 
     //#region scheme
 
-    getScheme(name, options) {
+    getScheme(name: string, options: SchemeOptions): Color[] {
         return Color.createScheme(this, name, options);
     }
 
-    static getScheme(color, name, options) {
+    static getScheme(color: Color, name: string, options?: SchemeOptions): Color[] {
         return Color.createScheme(color, name, options);
     }
 
@@ -241,7 +323,7 @@ class Color {
      * @param {Object} options 
      * @returns Color[]
      */
-    static monochromatic(color, options) {
+    static monochromatic(color: Color, options: MonochromeOptions) {
         ic(color, Color);
         let results = oc(options).results || 3;
         let hsv = Color.toHsv(color);
@@ -260,7 +342,7 @@ class Color {
         return result;
     }
 
-    monochromatic(options) {
+    monochromatic(options: MonochromeOptions) {
         return Color.monochromatic(this, options);
     }
 
@@ -269,7 +351,7 @@ class Color {
      * @param {Color} color 
      * @returns Color
      */
-    static complementary(color) {
+    static complementary(color: Color): Color {
         ic(color, Color);
         let hsl = Color.toHsl(color);
         let h = hsl.h,
@@ -280,7 +362,7 @@ class Color {
 
     }
 
-    complementary() {
+    complementary(): Color {
         return Color.complementary(this);
     }
 
@@ -290,7 +372,7 @@ class Color {
      * @param {Object} options
      * @returns Color[3]
      */
-    static splitComplementary(color, options?) {
+    static splitComplementary(color: Color, options?: SplitComplementaryOptions): Color[] {
         ic(color, Color);
         let hsl = Color.toHsl(color);
         let angle = oc(options).angle || 15;
@@ -308,7 +390,7 @@ class Color {
 
     }
 
-    splitComplementary(options) {
+    splitComplementary(options: SplitComplementaryOptions): Color[] {
         return Color.splitComplementary(this, options);
     }
 
@@ -318,7 +400,7 @@ class Color {
      * @param {Object} options
      * @returns Color[4]
     */
-    static doubleComplementary(color, options?) {
+    static doubleComplementary(color: Color, options?: DoubleComplementaryOptions): Color[] {
         ic(color, Color);
         let hsl = Color.toHsl(color);
         let angle = oc(options).angle || 15;
@@ -334,7 +416,7 @@ class Color {
         return result;
     }
 
-    doubleComplementary(options) {
+    doubleComplementary(options: DoubleComplementaryOptions): Color[] {
         return Color.doubleComplementary(this, options);
     }
 
@@ -343,7 +425,7 @@ class Color {
      * @param {Color} color 
      * @returns Color[4]
     */
-    static square(color) {
+    static square(color: Color): Color[] {
         ic(color, Color);
         let hsl = Color.toHsl(color);
         let h = hsl.h,
@@ -359,7 +441,7 @@ class Color {
         return result;
     }
 
-    square() {
+    square(): Color[] {
         return Color.square(this);
     }
 
@@ -369,7 +451,7 @@ class Color {
      * @param {Object} options
      * @returns Color[4]
     */
-    static tetradic(color, options?) {
+    static tetradic(color: Color, options?: TetradicOptions): Color[] {
         ic(color, Color);
         let hsl = Color.toHsl(color);
         let angle = oc(options).angle;
@@ -384,7 +466,7 @@ class Color {
         ];
     }
 
-    tetradic(options) {
+    tetradic(options: TetradicOptions): Color[] {
         return Color.tetradic(this, options);
     }
 
@@ -394,7 +476,7 @@ class Color {
      * @param {Color} color 
      * @returns Color[3]
     */
-    static triadic(color) {
+    static triadic(color: Color): Color[] {
         ic(color, Color);
         let hsl = Color.toHsl(color);
         let h = hsl.h,
@@ -407,7 +489,7 @@ class Color {
         ];
     }
 
-    triadic() {
+    triadic(): Color[] {
         return Color.triadic(this);
     }
 
@@ -417,7 +499,7 @@ class Color {
      * @param {Object} options
      * @returns Color[3]
     */
-    static analogous(color, options?) {
+    static analogous(color: Color, options?: AnalogousOptions): Color[] {
         ic(color, Color);
         let hsl = Color.toHsl(color);
         let angle = oc(options).angle;
@@ -431,11 +513,11 @@ class Color {
         ];
     }
 
-    analogous(options) {
+    analogous(options: AnalogousOptions): Color[] {
         return Color.analogous(this, options);
     }
 
-    static materialPalette(color, options?) {
+    static materialPalette(color: Color, options?: SchemeOptions): Color {
         var opt = oc(options);
         var baseLight = opt.baseLight;
         var baseDark = opt.baseDark === "self" || !opt.baseDark ? this.multiply(color, color) : opt.baseDark;
@@ -456,10 +538,10 @@ class Color {
             "A200": Color.lighten(Color.saturate(Color.mix(baseDark, color, 15), 80), 55),
             "A400": Color.lighten(Color.saturate(Color.mix(baseLight, color, 100), 55), 10),
             "A700": Color.lighten(Color.saturate(Color.mix(baseDark, color, 83), 65), 10)
-        };
+        } as Color;
     }
 
-    materialPalette(options) {
+    materialPalette(options: SchemeOptions) {
         return Color.materialPalette(this, options);
     }
 
@@ -472,7 +554,7 @@ class Color {
      * @param {object} options 
      * @returns 
      */
-    static createScheme(color, name, options) {
+    static createScheme(color: Color, name: string, options?: SchemeOptions): Color[] {
         switch (name.toLowerCase()) {
             case "analogous":
             case "analog": return Color.analogous(color);
@@ -489,7 +571,7 @@ class Color {
 
             case "complementary":
             case "complement":
-            case "comp": return Color.complementary(color);
+            case "comp": return Color.complementary(color) as unknown as Color[];
 
             case "double-complementary":
             case "double-complement":
@@ -500,7 +582,7 @@ class Color {
             case "split": return Color.splitComplementary(color);
 
             case "square": return Color.square(color);
-            case "material": return Color.materialPalette(color);
+            case "material": return Color.materialPalette(color) as unknown as Color[];
         }
     }
 
@@ -512,7 +594,7 @@ class Color {
      * @param {Number} g 
      * @param {Number} b 
      */
-    constructor(r, g, b) {
+    constructor(r: number, g: number, b: number) {
         if (!((0 <= r && r <= 255) && (0 <= g && g <= 255) && (0 <= b && b <= 255))) { throw new Error('Color values out of bounds (0 - 255)'); };
         this.red = nc(tc(r, "number"));
         this.green = nc(tc(g, "number"));
@@ -528,7 +610,7 @@ class Color {
      * @param {Number} amount 
      * @returns Color
      */
-    static saturate(color, amount) {
+    static saturate(color: Color, amount: number): Color {
         oc(color, Color);
         tc(amount, "number");
         let hsl = color.toHsl();
@@ -543,7 +625,7 @@ class Color {
      * @param {Number} amount 
      * @returns Color 
      */
-    saturate(amount) {
+    saturate(amount: number): Color {
         return Color.saturate(this, amount);
     }
     /**
@@ -552,7 +634,7 @@ class Color {
      * @param {Number} amount 
      * @returns Color
      */
-    static desaturate(color, amount) {
+    static desaturate(color: Color, amount: number): Color {
         oc(color, Color);
         tc(amount, "number");
         let hsl = color.toHsl();
@@ -567,7 +649,7 @@ class Color {
      * @param {Number} amount 
      * @returns Color 
      */
-    desaturate(amount) {
+    desaturate(amount: number): Color {
         return Color.desaturate(this, amount);
     }
 
@@ -576,7 +658,7 @@ class Color {
      * @param {Color} color 
      * @returns Color 
      */
-    static grayscale(color) {
+    static grayscale(color: Color): Color {
         return Color.desaturate(color, 100);
     }
 
@@ -584,7 +666,7 @@ class Color {
      * 
      * @returns Color 
      */
-    grayscale() {
+    grayscale(): Color {
         return Color.greyscale(this, 100);
     }
 
@@ -593,7 +675,7 @@ class Color {
      * @param {Color} color 
      * @returns Color 
      */
-    static greyscale(color, value: number) {
+    static greyscale(color: Color, value: number): Color {
         return Color.desaturate(color, 100);
     }
 
@@ -601,7 +683,7 @@ class Color {
      * 
      * @returns Color 
      */
-    greyscale() {
+    greyscale(): Color {
         return Color.greyscale(this, 100);
     }
 
@@ -783,27 +865,27 @@ class Color {
      * @param {string} hex
      * @returns Color
      */
-    static fromHex(hex) {
-        if (!hex.match(/^#?(?:[0-9a-fA-F]{3}){1,2}$/i)) { throw new Error('Invalid Hex code: "' + hex + '"'); }
+    static fromHex(hex: string): Color {
+        if (!hex.match(/^#(?:[\da-f]{3})\b|#(?:[\da-f]{6})\b|#(?:[\da-f]{9})\b$/i)) { throw new Error('Invalid Hex code: "' + hex + '"'); }
         let r = "0x00";
         let g = "0x00";
         let b = "0x00";
-        if (hex.length == 4) {
+        if (hex.length === 4) {
             r = "0x" + hex[1] + hex[1];
             g = "0x" + hex[2] + hex[2];
             b = "0x" + hex[3] + hex[3];
         }
-        else if (hex.length == 3) {
+        else if (hex.length === 3) {
             r = "0x" + hex[0] + hex[0];
             g = "0x" + hex[1] + hex[1];
             b = "0x" + hex[2] + hex[2];
         }
-        else if (hex.length == 7) {
+        else if (hex.length === 7) {
             r = "0x" + hex[1] + hex[2];
             g = "0x" + hex[3] + hex[4];
             b = "0x" + hex[5] + hex[6];
         }
-        else if (hex.length == 6) {
+        else if (hex.length === 6) {
             r = "0x" + hex[0] + hex[1];
             g = "0x" + hex[2] + hex[3];
             b = "0x" + hex[4] + hex[5];
@@ -821,7 +903,7 @@ class Color {
      * @param {Number} b 
      * @returns Color
      */
-    static fromRgb(r, g, b) {
+    static fromRgb(r: number, g: number, b: number): Color {
         return new Color(r, g, b);
     }
 
@@ -832,7 +914,7 @@ class Color {
      * @param {Number} lum 
      * @returns Color
      */
-    static fromHsl(hue, sat, lum) {
+    static fromHsl(hue: number, sat: number, lum: number): Color {
         hue = tc(hue, "number");
         sat = tc(sat, "number");
         lum = tc(lum, "number");
@@ -880,7 +962,7 @@ class Color {
      * @param {Number} lum 
      * @returns Color
      */
-    static fromHsv(hue, sat, val) {
+    static fromHsv(hue: number, sat: number, val: number): Color {
         hue = tc(hue, "number");
         sat = tc(sat, "number");
         val = tc(val, "number");
@@ -949,7 +1031,7 @@ class Color {
      * @param {string} colorString 
      * @returns Color 
      */
-    static fromCssString(colorString) {
+    static fromCssString(colorString: string): Color {
         tc(colorString, "string");
         var ctx = document.createElement("canvas").getContext("2d");
         ctx.fillStyle = colorString;
@@ -963,7 +1045,7 @@ class Color {
      * @param {string} colorName 
      * @returns {ThisType} 
      */
-    static fromName(colorName) {
+    static fromName(colorName: string): Color {
         colorName = tc(colorName, "string");
         const color = this.Colors[colorName.toUpperCase()];
         if (!color) { throw new Error('Invalid Color name'); }
@@ -984,19 +1066,19 @@ class Color {
      * @param {Color} color 
      * @returns string
      */
-    static toHex(color) {
+    static toHex(color: Color) {
         color = ic(color, Color);
         let r = Math.round(color.red).toString(16);
         let g = Math.round(color.green).toString(16);
         let b = Math.round(color.blue).toString(16);
 
-        if (r.length == 1) {
+        if (r.length === 1) {
             r = "0" + r;
         }
-        if (g.length == 1) {
+        if (g.length === 1) {
             g = "0" + g;
         }
-        if (b.length == 1) {
+        if (b.length === 1) {
             b = "0" + b;
         }
 
@@ -1009,7 +1091,7 @@ class Color {
      * @param {Color} color
      * @returns Number[] 
      */
-    static toHsl(color) {
+    static toHsl(color: Color): HSL {
         color = ic(color, Color);
 
         let h = 0;
@@ -1067,7 +1149,8 @@ class Color {
      * @param {Color} color 
      * @returns { hsv }
      */
-    static toHsv(color) {
+
+    static toHsv(color: Color): HSV {
         let h = 0;
         let s = 0;
         let v = 0;
@@ -1123,7 +1206,7 @@ class Color {
      * @param {Color} color 
      * @returns { rgb }
      */
-    static toRgb(color) {
+    static toRgb(color: Color): RGB {
         ic(color, Color);
         return { r: color.red, g: color.green, b: color.blue };
     }
@@ -1140,7 +1223,7 @@ class Color {
      * @param {Color} color 
      * @returns { cmyk }
      */
-    static toCmyk(color) {
+    static toCmyk(color: Color): CMYK {
         ic(color, Color);
         let { r, g, b } = color.toRgb();
         let c = 1 - (r / 255);
@@ -1171,7 +1254,7 @@ class Color {
      * @property {Number} l - luminance
      */
     /** @returns { hsl } */
-    toHsl() {
+    toHsl(): HSL {
         return Color.toHsl(this);
     }
 
@@ -1182,26 +1265,26 @@ class Color {
      * @property {Number} v - value
      */
     /** @returns { hsv } */
-    toHsv() {
+    toHsv(): HSV {
         return Color.toHsv(this);
     }
 
     /** @returns string */
-    toHex() {
+    toHex(): string {
         return Color.toHex(this);
     }
 
     /**
      * @returns {rgb}
      */
-    toRgb() {
+    toRgb(): RGB {
         return Color.toRgb(this);
     }
 
     /**
      * @returns {cmyk}
      */
-    toCmyk() {
+    toCmyk(): CMYK {
         return Color.toCmyk(this);
     }
 
