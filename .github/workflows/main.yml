@@ -20,7 +20,7 @@ jobs:
     name: "Sync with azure devops"
     steps:
       - name: "Checkout"
-        uses: actions/checkout@v2.0
+        uses: actions/checkout@v2
       - name: "Push"
         uses: ./
         id: "push-to-other-repo"
