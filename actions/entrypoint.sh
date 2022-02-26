@@ -4,4 +4,4 @@ if ! git ls-remote --exit-code azure --quiet; then
     git remote add azure "$1"
 fi
 
-git push azure master
+git push azure main
