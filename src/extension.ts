@@ -27,7 +27,6 @@ function parseColorString(color: string) {
 			const l = p.values[2] as number;
 			const a = p.alpha as number;
 			const { r, g, b } = Color.fromHsl(h, s, l).toRgb();
-
 			return new vscode.Color(r / 255, g / 255, b / 255, a);
 		}
 
@@ -56,20 +55,19 @@ function getPos(text: string, index: number): vscode.Position {
 
 
 class Matcher {
-
-
 	static getMatches(text: string): Match[] {
-		const matches = text.matchAll(/(#(?:[\da-f]{3})\b|#(?:[\da-f]{6})\b|#(?:[\da-f]{9})\b|rgb\(\s*(?:\d{1,3}\s*,\s*){2}\d{1,3}\s*\)|rgba\(\s*(?:\d{1,3}\s*,\s*){3}\d*\.?\d+\s*\)|hsl\(\s*\d{1,3}(?:\s*(?:,|\s)\s*\d{1,3}%){2}\s*\)|hsla\(\s*\d{1,3}(?:\s*(?:,|\s)\s*\d{1,3}%){2}(?:,|\s)\s*\d*\.?\d+\s*\))/gi);
+		const matches = text.matchAll(/#([a-f0-9]{3,4}|[a-f0-9]{4}(?:[a-f0-9]{2}){1,2})\b|hsla?\(\s*(-?\d*(?:\.\d+)?(?:deg|rad|turn)?)\s*,\s*(-?\d*(?:\.\d+)?%)\s*,\s*(-?\d*(?:\.\d+)?%)\s*(?:,\s*(-?\d*(?:\.\d+)?%?)\s*)?\)|hsla?\(\s*(-?\d*(?:\.\d+)?(?:deg|rad|turn)?)\s*\s+(-?\d*(?:\.\d+)?%)\s+(-?\d*(?:\.\d+)?%)\s*(?:\s*\/\s*(-?\d*(?:\.\d+)?%?)\s*)?\)|rgba?\(\s*(-?\d*(?:\.\d+)?)\s*,\s*(-?\d*(?:\.\d+)?)\s*,\s*(-?\d*(?:\.\d+)?)\s*(?:,\s*(-?\d*(?:\.\d+)?%?)\s*)?\)|rgba?\(\s*(-?\d*(?:\.\d+)?%)\s*,\s*(-?\d*(?:\.\d+)?%)\s*,\s*(-?\d*(?:\.\d+)?%)\s*(?:,\s*(-?\d*(?:\.\d+)?%?)\s*)?\)|rgba?\(\s*(-?\d*(?:\.\d+)?)\s+(-?\d*(?:\.\d+)?)\s+(-?\d*(?:\.\d+)?)\s*(?:\s*\/\s*(-?\d*(?:\.\d+)?%?)\s*)?\)|rgba?\(\s*(-?\d*(?:\.\d+)?%)\s+(-?\d*(?:\.\d+)?%)\s+(-?\d*(?:\.\d+)?%)\s*(?:\s*\/\s*(-?\d*(?:\.\d+)?%?)\s*)?\)|\baliceblue\b|\bantiquewhite\b|\baqua\b|\baquamarine\b|\bazure\b|\bbeige\b|\bbisque\b|\bblack\b|\bblanchedalmond\b|\bblue\b|\bblueviolet\b|\bbrown\b|\bburlywood\b|\bcadetblue\b|\bchartreuse\b|\bchocolate\b|\bcoral\b|\bcornflowerblue\b|\bcornsilk\b|\bcrimson\b|\bcyan\b|\bdarkblue\b|\bdarkcyan\b|\bdarkgoldenrod\b|\bdarkgray\b|\bdarkgrey\b|\bdarkgreen\b|\bdarkkhaki\b|\bdarkmagenta\b|\bdarkolivegreen\b|\bdarkorange\b|\bdarkorchid\b|\bdarkred\b|\bdarksalmon\b|\bdarkseagreen\b|\bdarkslateblue\b|\bdarkslategray\b|\bdarkslategrey\b|\bdarkturquoise\b|\bdarkviolet\b|\bdeeppink\b|\bdeepskyblue\b|\bdimgray\b|\bdimgrey\b|\bdodgerblue\b|\bfirebrick\b|\bfloralwhite\b|\bforestgreen\b|\bfuchsia\b|\bgainsboro\b|\bghostwhite\b|\bgold\b|\bgoldenrod\b|\bgray\b|\bgrey\b|\bgreen\b|\bgreenyellow\b|\bhoneydew\b|\bhotpink\b|\bindianred\b|\bindigo\b|\bivory\b|\bkhaki\b|\blavender\b|\blavenderblush\b|\blawngreen\b|\blemonchiffon\b|\blightblue\b|\blightcoral\b|\blightcyan\b|\blightgoldenrodyellow\b|\blightgray\b|\blightgrey\b|\blightgreen\b|\blightpink\b|\blightsalmon\b|\blightseagreen\b|\blightskyblue\b|\blightslategray\b|\blightslategrey\b|\blightsteelblue\b|\blightyellow\b|\blime\b|\blimegreen\b|\blinen\b|\bmagenta\b|\bmaroon\b|\bmediumaquamarine\b|\bmediumblue\b|\bmediumorchid\b|\bmediumpurple\b|\bmediumseagreen\b|\bmediumslateblue\b|\bmediumspringgreen\b|\bmediumturquoise\b|\bmediumvioletred\b|\bmidnightblue\b|\bmintcream\b|\bmistyrose\b|\bmoccasin\b|\bnavajowhite\b|\bnavy\b|\boldlace\b|\bolive\b|\bolivedrab\b|\borange\b|\borangered\b|\borchid\b|\bpalegoldenrod\b|\bpalegreen\b|\bpaleturquoise\b|\bpalevioletred\b|\bpapayawhip\b|\bpeachpuff\b|\bperu\b|\bpink\b|\bplum\b|\bpowderblue\b|\bpurple\b|\brebeccapurple\b|\bred\b|\brosybrown\b|\broyalblue\b|\bsaddlebrown\b|\bsalmon\b|\bsandybrown\b|\bseagreen\b|\bseashell\b|\bsienna\b|\bsilver\b|\bskyblue\b|\bslateblue\b|\bslategray\b|\bslategrey\b|\bsnow\b|\bspringgreen\b|\bsteelblue\b|\btan\b|\bteal\b|\bthistle\b|\btomato\b|\bturquoise\b|\bviolet\b|\bwheat\b|\bwhite\b|\bwhitesmoke\b|\byellow\b|\byellowgreen\b|\btransparent\b/gi);
 		return Array.from(matches).map(match => {
 			const t = match[0];
-			console.log({ mytype: t });
 			const length = t.length;
 			let type: string;
+
 			if (t.startsWith('hsl(')) { type = "hsl"; }
 			else if (t.startsWith('hsla(')) { type = "hsla"; }
 			else if (t.startsWith('rgb(')) { type = "rgb"; }
 			else if (t.startsWith('rgba(')) { type = "rgba"; }
-			else if (t.startsWith('#')) { ; type = "hex"; }
+			else if (t.startsWith('#')) { type = "hex"; }
+			else { type = "string"; }
 
 			const range = new vscode.Range(
 				getPos(text, match.index),
