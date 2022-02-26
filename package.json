@@ -4,7 +4,7 @@
   "icon": "icon.png",
   "publisher": "MarkosTh09",
   "description": "let's you use vscode's css color picker in other documents",
-  "version": "0.0.3",
+  "version": "1.0.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/Markos-Th09/vscode-color-picker.git"
