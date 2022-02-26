@@ -9,6 +9,7 @@
     "type": "git",
     "url": "https://github.com/Markos-Th09/vscode-color-picker.git"
   },
+  "license": "MIT",
   "engines": {
     "vscode": "^1.62.0"
   },
