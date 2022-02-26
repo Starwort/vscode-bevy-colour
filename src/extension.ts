@@ -14,6 +14,7 @@ function parseColorString(color: string) {
 	try {
 		const p = parse(color);
 		if (!p) { throw new Error('invalid color string'); }
+		console.log({ p, color });
 		if (p.type === "rgb") {
 			const r = p.values[0] as number;
 			const g = p.values[1] as number;
@@ -59,6 +60,7 @@ class Matcher {
 		const matches = text.matchAll(/#([a-f0-9]{3,4}|[a-f0-9]{4}(?:[a-f0-9]{2}){1,2})\b|hsla?\(\s*(-?\d*(?:\.\d+)?(?:deg|rad|turn)?)\s*,\s*(-?\d*(?:\.\d+)?%)\s*,\s*(-?\d*(?:\.\d+)?%)\s*(?:,\s*(-?\d*(?:\.\d+)?%?)\s*)?\)|hsla?\(\s*(-?\d*(?:\.\d+)?(?:deg|rad|turn)?)\s*\s+(-?\d*(?:\.\d+)?%)\s+(-?\d*(?:\.\d+)?%)\s*(?:\s*\/\s*(-?\d*(?:\.\d+)?%?)\s*)?\)|rgba?\(\s*(-?\d*(?:\.\d+)?)\s*,\s*(-?\d*(?:\.\d+)?)\s*,\s*(-?\d*(?:\.\d+)?)\s*(?:,\s*(-?\d*(?:\.\d+)?%?)\s*)?\)|rgba?\(\s*(-?\d*(?:\.\d+)?%)\s*,\s*(-?\d*(?:\.\d+)?%)\s*,\s*(-?\d*(?:\.\d+)?%)\s*(?:,\s*(-?\d*(?:\.\d+)?%?)\s*)?\)|rgba?\(\s*(-?\d*(?:\.\d+)?)\s+(-?\d*(?:\.\d+)?)\s+(-?\d*(?:\.\d+)?)\s*(?:\s*\/\s*(-?\d*(?:\.\d+)?%?)\s*)?\)|rgba?\(\s*(-?\d*(?:\.\d+)?%)\s+(-?\d*(?:\.\d+)?%)\s+(-?\d*(?:\.\d+)?%)\s*(?:\s*\/\s*(-?\d*(?:\.\d+)?%?)\s*)?\)|\baliceblue\b|\bantiquewhite\b|\baqua\b|\baquamarine\b|\bazure\b|\bbeige\b|\bbisque\b|\bblack\b|\bblanchedalmond\b|\bblue\b|\bblueviolet\b|\bbrown\b|\bburlywood\b|\bcadetblue\b|\bchartreuse\b|\bchocolate\b|\bcoral\b|\bcornflowerblue\b|\bcornsilk\b|\bcrimson\b|\bcyan\b|\bdarkblue\b|\bdarkcyan\b|\bdarkgoldenrod\b|\bdarkgray\b|\bdarkgrey\b|\bdarkgreen\b|\bdarkkhaki\b|\bdarkmagenta\b|\bdarkolivegreen\b|\bdarkorange\b|\bdarkorchid\b|\bdarkred\b|\bdarksalmon\b|\bdarkseagreen\b|\bdarkslateblue\b|\bdarkslategray\b|\bdarkslategrey\b|\bdarkturquoise\b|\bdarkviolet\b|\bdeeppink\b|\bdeepskyblue\b|\bdimgray\b|\bdimgrey\b|\bdodgerblue\b|\bfirebrick\b|\bfloralwhite\b|\bforestgreen\b|\bfuchsia\b|\bgainsboro\b|\bghostwhite\b|\bgold\b|\bgoldenrod\b|\bgray\b|\bgrey\b|\bgreen\b|\bgreenyellow\b|\bhoneydew\b|\bhotpink\b|\bindianred\b|\bindigo\b|\bivory\b|\bkhaki\b|\blavender\b|\blavenderblush\b|\blawngreen\b|\blemonchiffon\b|\blightblue\b|\blightcoral\b|\blightcyan\b|\blightgoldenrodyellow\b|\blightgray\b|\blightgrey\b|\blightgreen\b|\blightpink\b|\blightsalmon\b|\blightseagreen\b|\blightskyblue\b|\blightslategray\b|\blightslategrey\b|\blightsteelblue\b|\blightyellow\b|\blime\b|\blimegreen\b|\blinen\b|\bmagenta\b|\bmaroon\b|\bmediumaquamarine\b|\bmediumblue\b|\bmediumorchid\b|\bmediumpurple\b|\bmediumseagreen\b|\bmediumslateblue\b|\bmediumspringgreen\b|\bmediumturquoise\b|\bmediumvioletred\b|\bmidnightblue\b|\bmintcream\b|\bmistyrose\b|\bmoccasin\b|\bnavajowhite\b|\bnavy\b|\boldlace\b|\bolive\b|\bolivedrab\b|\borange\b|\borangered\b|\borchid\b|\bpalegoldenrod\b|\bpalegreen\b|\bpaleturquoise\b|\bpalevioletred\b|\bpapayawhip\b|\bpeachpuff\b|\bperu\b|\bpink\b|\bplum\b|\bpowderblue\b|\bpurple\b|\brebeccapurple\b|\bred\b|\brosybrown\b|\broyalblue\b|\bsaddlebrown\b|\bsalmon\b|\bsandybrown\b|\bseagreen\b|\bseashell\b|\bsienna\b|\bsilver\b|\bskyblue\b|\bslateblue\b|\bslategray\b|\bslategrey\b|\bsnow\b|\bspringgreen\b|\bsteelblue\b|\btan\b|\bteal\b|\bthistle\b|\btomato\b|\bturquoise\b|\bviolet\b|\bwheat\b|\bwhite\b|\bwhitesmoke\b|\byellow\b|\byellowgreen\b|\btransparent\b/gi);
 		return Array.from(matches).map(match => {
 			const t = match[0];
+			console.log({ match });
 			const length = t.length;
 			let type: string;
 
@@ -75,6 +77,7 @@ class Matcher {
 			);
 
 			const col = parseColorString(t);
+
 
 
 			if (col) {
@@ -120,13 +123,10 @@ class Picker {
 
 	private register() {
 		this.languages.forEach(language => {
-			console.log(language);
 			vscode.languages.registerColorProvider(language, {
 				provideDocumentColors(document: vscode.TextDocument, token: vscode.CancellationToken) {
-
 					const matches = Matcher.getMatches(document.getText());
-					console.log({ text: document.getText() });
-					return matches.map((match, i,) => new vscode.ColorInformation(
+					return matches.map((match) => new vscode.ColorInformation(
 						match.range,
 						match.color
 					));
@@ -140,27 +140,12 @@ class Picker {
 					let colString = context.document.getText(context.range);
 					let t = colString;
 
-
 					const presentationHex = new vscode.ColorPresentation(c.toString('hex'));
 					const presentationHexa = new vscode.ColorPresentation(c.toString('hexa'));
 					const presentationHsl = new vscode.ColorPresentation(c.toString('hsl'));
 					const presentationHsla = new vscode.ColorPresentation(c.toString('hsla'));
 					const presentationRgb = new vscode.ColorPresentation(c.toString('rgb'));
 					const presentationRgba = new vscode.ColorPresentation(c.toString('rgba'));
-
-					let hasAlpha = false;
-					if (t.startsWith('#') && (t.length === 9)) {
-						hasAlpha = true;
-					}
-					if (t.startsWith('hsla')) {
-						hasAlpha = true;
-					}
-					if (t.startsWith('rgba')) {
-						hasAlpha = true;
-					}
-					if (color.alpha !== 1) {
-						hasAlpha = true;
-					}
 
 					let withAlpha = [
 						presentationHexa,
@@ -174,25 +159,71 @@ class Picker {
 						presentationRgb
 					];
 
+					const parsed = parse(colString);
+					console.log({ colString });
 
-					return hasAlpha ? withAlpha : withoutAlpha;
+					if (colString.startsWith("#") && parsed.alpha !== 1) {
+						withAlpha = [
+							presentationHexa,
+							presentationHsla,
+							presentationRgba
+						];
+						console.log("hexa");
+						// type = "hexa";
+
+					}
+					else if (colString.startsWith("#")) {
+						withoutAlpha = [
+							presentationHex,
+							presentationHsl,
+							presentationRgb,
+						];
+						console.log("hex");
+						// type = "hex";
+
+					}
+					else if ((parsed.type === "rgb" && parsed.alpha !== 1) || parsed.type === "rgba") {
+						withAlpha = [
+							presentationRgba,
+							presentationHexa,
+							presentationHsla,
+						];
+						// type = "rgba";
+
+					}
+					else if (parsed.type === "rgb" || parsed.type === "rgba") {
+						withoutAlpha = [
+							presentationRgb,
+							presentationHex,
+							presentationHsl,
+						];
+						// type = "rgb";
+
+					}
+					else if ((parsed.type === "hsl" && parsed.alpha !== 1) || parsed.type === "hsla") {
+						withAlpha = [
+							presentationHsla,
+							presentationRgba,
+							presentationHexa,
+						];
+						// type = "hsla";
+
+					}
+					else if (parsed.type === "hsl" || parsed.type === "hsla") {
+						withoutAlpha = [
+							presentationHsl,
+							presentationRgb,
+							presentationHex,
+						];
+						// type = "hsl";
+					}
+
+
+					return c.alpha !== 1 ? withAlpha : withoutAlpha;
 				}
 			});
 		});
 	}
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 	dispose() { }
 }

@@ -1,5 +1,3 @@
-"use-strict";
-
 interface SchemeOptions {
     angle: number
     results: number
