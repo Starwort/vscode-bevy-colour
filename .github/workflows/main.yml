@@ -16,9 +16,13 @@ on:
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   sync:
-  - name: Push directory to another repository
-    uses: cpina/github-action-push-to-another-repository@v1.4.1
-    destination-repository-name: "https://markostheocharis2009@dev.azure.com/markostheocharis2009/VSCode%20color%20picker/_git/vscode-color-picker"
-    
-
-    
+    runs-on: ubuntu-latest
+    name: "Sync with azure devops"
+    steps:
+      - name: "Checkout"
+        uses: actions/checkout@v2.0
+      - name: "Push"
+        uses: ./
+        id: "push-to-other-repo"
+        with:
+          repo-url: "https://markostheocharis2009@dev.azure.com/markostheocharis2009/VSCode%20color%20picker/_git/vscode-color-picker"

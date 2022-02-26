@@ -9,3 +9,6 @@ webpack.config.js
 .yarn
 .dccache
 .env
+.github
+actions
+action.yml
