@@ -6,7 +6,7 @@ A simple Color picker for vscode that lets you use vscode's css color picker in 
 
 * To make it work for your preferred language, just add a `vscode-color-picker.languages` entry in settings.json, with VSCode's identifier string for the language, in the list. For ex.
   ```json
-    "vscode-color-picker.languages": [
+    "color-picker.languages": [
         "python",
         "javascript",
         "typescript"
@@ -27,6 +27,6 @@ A list of VSCode's language identifiers is available [here](https://code.visuals
 
 ### What types of strings are recognized colors?
 
-The currently supported formats are Hsl, Rgb, Hsla, Rgba and Hex. Every valid css color should work.
+Every valid css color should work.
 
  

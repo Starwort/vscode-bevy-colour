@@ -4,3 +4,8 @@ out/
 src/
 tsconfig.json
 webpack.config.js
+.vscode-test/
+*.vsix
+.yarn
+.dccache
+.env
