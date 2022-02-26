@@ -1,3 +1,7 @@
 #!/bin/sh
 echo "Pushing changes to $1"
-git remote add origin "$1"
+if ! git ls-remote --exit-code azure --quiet; then
+    git remote add azure "$1"
+fi
+
+git push azure master
