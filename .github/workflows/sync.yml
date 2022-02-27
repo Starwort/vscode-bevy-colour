@@ -1,19 +1,13 @@
-# This is a basic workflow to help you get started with Actions
-
 name: Sync with azure devops
 
-# Controls when the workflow will run
 on:
-  # Triggers the workflow on push or pull request events but only for the main branch
   push:
     branches: [ main ]
   pull_request:
     branches: [ main ]
 
-  # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   sync:
     runs-on: ubuntu-latest
@@ -22,7 +16,7 @@ jobs:
       - name: "Checkout"
         uses: actions/checkout@v2
       - name: "Push"
-        uses: ./
+        uses: ./actions/push-to-other-repo
         id: "push-to-other-repo"
         with:
           repo-url: "https://markostheocharis2009:${{ secrets.AZURE_PASSWORD }}@dev.azure.com/markostheocharis2009/VSCode%20color%20picker/_git/vscode-color-picker"

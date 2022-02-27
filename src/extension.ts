@@ -14,7 +14,6 @@ function parseColorString(color: string) {
 	try {
 		const p = parse(color);
 		if (!p) { throw new Error('invalid color string'); }
-		console.log({ p, color });
 		if (p.type === "rgb") {
 			const r = p.values[0] as number;
 			const g = p.values[1] as number;
@@ -32,7 +31,6 @@ function parseColorString(color: string) {
 		}
 
 	} catch (e) {
-		console.log(e);
 		return null;
 	}
 
@@ -60,7 +58,6 @@ class Matcher {
 		const matches = text.matchAll(/#([a-f0-9]{3,4}|[a-f0-9]{4}(?:[a-f0-9]{2}){1,2})\b|hsla?\(\s*(-?\d*(?:\.\d+)?(?:deg|rad|turn)?)\s*,\s*(-?\d*(?:\.\d+)?%)\s*,\s*(-?\d*(?:\.\d+)?%)\s*(?:,\s*(-?\d*(?:\.\d+)?%?)\s*)?\)|hsla?\(\s*(-?\d*(?:\.\d+)?(?:deg|rad|turn)?)\s*\s+(-?\d*(?:\.\d+)?%)\s+(-?\d*(?:\.\d+)?%)\s*(?:\s*\/\s*(-?\d*(?:\.\d+)?%?)\s*)?\)|rgba?\(\s*(-?\d*(?:\.\d+)?)\s*,\s*(-?\d*(?:\.\d+)?)\s*,\s*(-?\d*(?:\.\d+)?)\s*(?:,\s*(-?\d*(?:\.\d+)?%?)\s*)?\)|rgba?\(\s*(-?\d*(?:\.\d+)?%)\s*,\s*(-?\d*(?:\.\d+)?%)\s*,\s*(-?\d*(?:\.\d+)?%)\s*(?:,\s*(-?\d*(?:\.\d+)?%?)\s*)?\)|rgba?\(\s*(-?\d*(?:\.\d+)?)\s+(-?\d*(?:\.\d+)?)\s+(-?\d*(?:\.\d+)?)\s*(?:\s*\/\s*(-?\d*(?:\.\d+)?%?)\s*)?\)|rgba?\(\s*(-?\d*(?:\.\d+)?%)\s+(-?\d*(?:\.\d+)?%)\s+(-?\d*(?:\.\d+)?%)\s*(?:\s*\/\s*(-?\d*(?:\.\d+)?%?)\s*)?\)|\baliceblue\b|\bantiquewhite\b|\baqua\b|\baquamarine\b|\bazure\b|\bbeige\b|\bbisque\b|\bblack\b|\bblanchedalmond\b|\bblue\b|\bblueviolet\b|\bbrown\b|\bburlywood\b|\bcadetblue\b|\bchartreuse\b|\bchocolate\b|\bcoral\b|\bcornflowerblue\b|\bcornsilk\b|\bcrimson\b|\bcyan\b|\bdarkblue\b|\bdarkcyan\b|\bdarkgoldenrod\b|\bdarkgray\b|\bdarkgrey\b|\bdarkgreen\b|\bdarkkhaki\b|\bdarkmagenta\b|\bdarkolivegreen\b|\bdarkorange\b|\bdarkorchid\b|\bdarkred\b|\bdarksalmon\b|\bdarkseagreen\b|\bdarkslateblue\b|\bdarkslategray\b|\bdarkslategrey\b|\bdarkturquoise\b|\bdarkviolet\b|\bdeeppink\b|\bdeepskyblue\b|\bdimgray\b|\bdimgrey\b|\bdodgerblue\b|\bfirebrick\b|\bfloralwhite\b|\bforestgreen\b|\bfuchsia\b|\bgainsboro\b|\bghostwhite\b|\bgold\b|\bgoldenrod\b|\bgray\b|\bgrey\b|\bgreen\b|\bgreenyellow\b|\bhoneydew\b|\bhotpink\b|\bindianred\b|\bindigo\b|\bivory\b|\bkhaki\b|\blavender\b|\blavenderblush\b|\blawngreen\b|\blemonchiffon\b|\blightblue\b|\blightcoral\b|\blightcyan\b|\blightgoldenrodyellow\b|\blightgray\b|\blightgrey\b|\blightgreen\b|\blightpink\b|\blightsalmon\b|\blightseagreen\b|\blightskyblue\b|\blightslategray\b|\blightslategrey\b|\blightsteelblue\b|\blightyellow\b|\blime\b|\blimegreen\b|\blinen\b|\bmagenta\b|\bmaroon\b|\bmediumaquamarine\b|\bmediumblue\b|\bmediumorchid\b|\bmediumpurple\b|\bmediumseagreen\b|\bmediumslateblue\b|\bmediumspringgreen\b|\bmediumturquoise\b|\bmediumvioletred\b|\bmidnightblue\b|\bmintcream\b|\bmistyrose\b|\bmoccasin\b|\bnavajowhite\b|\bnavy\b|\boldlace\b|\bolive\b|\bolivedrab\b|\borange\b|\borangered\b|\borchid\b|\bpalegoldenrod\b|\bpalegreen\b|\bpaleturquoise\b|\bpalevioletred\b|\bpapayawhip\b|\bpeachpuff\b|\bperu\b|\bpink\b|\bplum\b|\bpowderblue\b|\bpurple\b|\brebeccapurple\b|\bred\b|\brosybrown\b|\broyalblue\b|\bsaddlebrown\b|\bsalmon\b|\bsandybrown\b|\bseagreen\b|\bseashell\b|\bsienna\b|\bsilver\b|\bskyblue\b|\bslateblue\b|\bslategray\b|\bslategrey\b|\bsnow\b|\bspringgreen\b|\bsteelblue\b|\btan\b|\bteal\b|\bthistle\b|\btomato\b|\bturquoise\b|\bviolet\b|\bwheat\b|\bwhite\b|\bwhitesmoke\b|\byellow\b|\byellowgreen\b|\btransparent\b/gi);
 		return Array.from(matches).map(match => {
 			const t = match[0];
-			console.log({ match });
 			const length = t.length;
 			let type: string;
 
@@ -133,12 +130,9 @@ class Picker {
 
 				},
 				provideColorPresentations(color, context, token) {
-					let c = Color.fromRgb(color.red * 255, color.green * 255, color.blue * 255);
+					const c = Color.fromRgb(color.red * 255, color.green * 255, color.blue * 255);
 					c.alpha = color.alpha;
-					let hex = c.toString('hex');
-					let hsl = c.toString('hsl');
-					let colString = context.document.getText(context.range);
-					let t = colString;
+					const colString = context.document.getText(context.range);
 
 					const presentationHex = new vscode.ColorPresentation(c.toString('hex'));
 					const presentationHexa = new vscode.ColorPresentation(c.toString('hexa'));
@@ -160,7 +154,6 @@ class Picker {
 					];
 
 					const parsed = parse(colString);
-					console.log({ colString });
 
 					if (colString.startsWith("#") && parsed.alpha !== 1) {
 						withAlpha = [
@@ -168,7 +161,6 @@ class Picker {
 							presentationHsla,
 							presentationRgba
 						];
-						console.log("hexa");
 						// type = "hexa";
 
 					}
@@ -178,7 +170,6 @@ class Picker {
 							presentationHsl,
 							presentationRgb,
 						];
-						console.log("hex");
 						// type = "hex";
 
 					}
@@ -233,7 +224,6 @@ class Picker {
 export function activate(context: vscode.ExtensionContext) {
 	const picker = new Picker();
 	context.subscriptions.push(picker);
-	console.log("active");
 }
 
 // this method is called when your extension is deactivated

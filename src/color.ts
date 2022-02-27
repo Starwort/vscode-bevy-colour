@@ -518,7 +518,7 @@ class Color {
     static materialPalette(color: Color, options?: SchemeOptions): Color {
         var opt = oc(options);
         var baseLight = opt.baseLight;
-        var baseDark = opt.baseDark === "self" || !opt.baseDark ? this.multiply(color, color) : opt.baseDark;
+        var baseDark = opt.baseDark === "self" || !opt.baseDark ? Color.multiply(color, color) : opt.baseDark;
 
         return {
             "50": Color.mix(baseLight, color, 10),

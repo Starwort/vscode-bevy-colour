@@ -1,11 +1,11 @@
 name: "Push to another git repo"
 description: "This action pushes to another git repository"
 inputs:
-  repo-url:
-   description: "The url of the git repository"
+  vsce-token:
+   description: "Personal access token for publishing the extension"
    required: true
 runs:
   using: docker
-  image: actions/Dockerfile
+  image: Dockerfile
   args: 
-  - ${{ inputs.repo-url }}
+  - ${{ inputs.vsce-token }}
