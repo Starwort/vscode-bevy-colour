@@ -4,7 +4,7 @@
   "icon": "icon.png",
   "publisher": "Starwort",
   "description": "Lets you use VSCode's built-in colour picker with Bevy's colour constructors",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "repository": {
     "type": "git",
     "url": "https://github.com/Starwort/bevy-colour.git"
@@ -24,13 +24,13 @@
     "colorProvider": "true"
   },
   "scripts": {
-    "vscode:prepublish": "npm run package",
+    "vscode:prepublish": "bun run package",
     "compile": "webpack",
     "watch": "webpack",
     "package": "webpack --mode production --devtool hidden-source-map",
     "compile-tests": "tsc -p . --outDir out",
     "watch-tests": "tsc -p . -w --outDir out",
-    "pretest": "npm run compile-tests && npm run compile && npm run lint",
+    "pretest": "bun run compile-tests && bun run compile && bun run lint",
     "lint": "eslint src --ext ts",
     "test": "node ./out/test/runTest.js",
     "package:vsix": "vsce package --no-dependencies"
