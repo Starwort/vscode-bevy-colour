@@ -1,230 +1,187 @@
 import * as vscode from 'vscode';
-import Color from './color';
-import parse from 'parse-css-color';
+
+// https://stackoverflow.com/a/60027277
+//build regexes without worrying about
+// - double-backslashing
+// - adding whitespace for readability
+// - adding in comments
+const clean = (piece: string) => (piece
+    .replace(/((^|\n)(?:[^\/\\]|\/[^*\/]|\\.)*?)\s*\/\*(?:[^*]|\*[^\/])*(\*\/|)/g, '$1')
+    .replace(/((^|\n)(?:[^\/\\]|\/[^\/]|\\.)*?)\s*\/\/[^\n]*/g, '$1')
+    .replace(/\n\s*/g, '')
+);
+const regex = ({raw}, ...interpolations: any[]) => (
+    new RegExp(interpolations.reduce(
+        (regex, insert, index) => (regex + insert + clean(raw[index + 1])),
+        clean(raw[0])
+    ))
+);
 
 interface Match {
-	color: vscode.Color;
-	type: string;
-	length: number;
-	range: vscode.Range;
+    colour: vscode.Color;
+    type: string;
+    length: number;
+    range: vscode.Range;
 }
 
-function parseColorString(color: string) {
+function charToPosition(document: string, char: number): vscode.Position {
+    const lines = document.slice(0, char).split("\n");
 
-	try {
-		const p = parse(color);
-		if (!p) { throw new Error('invalid color string'); }
-		if (p.type === "rgb") {
-			const r = p.values[0] as number;
-			const g = p.values[1] as number;
-			const b = p.values[2] as number;
-			const a = p.alpha as number;
+    const line = lines.length - 1;
 
-			return new vscode.Color(r / 255, g / 255, b / 255, a);
-		} else {
-			const h = p.values[0] as number;
-			const s = p.values[1] as number;
-			const l = p.values[2] as number;
-			const a = p.alpha as number;
-			const { r, g, b } = Color.fromHsl(h, s, l).toRgb();
-			return new vscode.Color(r / 255, g / 255, b / 255, a);
-		}
+    const character = lines[line].length;
 
-	} catch (e) {
-		return null;
-	}
-
+    return new vscode.Position(line, character);
 }
 
+const COLOUR = regex`
+    Colo(u?)r::(?:
+        // s?rgba?
+        s?rgba\(\s*(\d*.\d*)\s*,\s*(\d*.\d*)\s*,\s*(\d*.\d*)\s*,\s*(\d*.\d*)\s*,?\s*\)
+        |s?rgb\(\s*(\d*.\d*)\s*,\s*(\d*.\d*)\s*,\s*(\d*.\d*)\s*,?\s*\)
+        // s?rgba?_u8
+        |s?rgba_u8\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,?\s*\)
+        |s?rgb_u8\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,?\s*\)
+    )
+`;
 
-function getPos(text: string, index: number): vscode.Position {
-
-	const nMatches = Array.from(text.slice(0, index).matchAll(/\n/g));
-
-	const lineNumber = nMatches.length;
-
-	const characterIndex = index - nMatches[lineNumber - 1].index;
-
-
-	return new vscode.Position(
-		lineNumber,
-		characterIndex - 1
-	);
+function identifyColour(colour: string) {
+    const match = COLOUR.exec(colour);
+    if (match === null) {
+        throw new Error("!! match was null for " + colour);
+    }
+    const isColour = match[1] != '';
+    switch (true) {
+        case match[2] !== undefined:
+            return {
+                type: "rgba",
+                colour: new vscode.Color(+match[2], +match[3], +match[4], +match[5]),
+                isColour,
+            };
+        case match[6] !== undefined:
+            return {
+                type: "rgb",
+                colour: new vscode.Color(+match[6], +match[7], +match[8], 1),
+                isColour,
+            };
+        case match[10] !== undefined:
+            return {
+                type: "rgba_u8",
+                colour: new vscode.Color(+match[10] / 255, +match[11] / 255, +match[12] / 255, +match[13] / 255),
+                isColour,
+            };
+        case match[14] !== undefined:
+            return {
+                type: "rgb_u8",
+                colour: new vscode.Color(+match[14] / 255, +match[15] / 255, +match[16] / 255, 1),
+                isColour,
+            };
+    }
 }
 
+function getMatches(document: string): Match[] {
+    const matches = document.matchAll(new RegExp(COLOUR.source, "g"));
+    return Array.from(matches).map(match => {
+        const length = match[0].length;
 
-class Matcher {
-	static getMatches(text: string): Match[] {
-		const matches = text.matchAll(/#([a-f0-9]{3,4}|[a-f0-9]{4}(?:[a-f0-9]{2}){1,2})\b|hsla?\(\s*(-?\d*(?:\.\d+)?(?:deg|rad|turn)?)\s*,\s*(-?\d*(?:\.\d+)?%)\s*,\s*(-?\d*(?:\.\d+)?%)\s*(?:,\s*(-?\d*(?:\.\d+)?%?)\s*)?\)|hsla?\(\s*(-?\d*(?:\.\d+)?(?:deg|rad|turn)?)\s*\s+(-?\d*(?:\.\d+)?%)\s+(-?\d*(?:\.\d+)?%)\s*(?:\s*\/\s*(-?\d*(?:\.\d+)?%?)\s*)?\)|rgba?\(\s*(-?\d*(?:\.\d+)?)\s*,\s*(-?\d*(?:\.\d+)?)\s*,\s*(-?\d*(?:\.\d+)?)\s*(?:,\s*(-?\d*(?:\.\d+)?%?)\s*)?\)|rgba?\(\s*(-?\d*(?:\.\d+)?%)\s*,\s*(-?\d*(?:\.\d+)?%)\s*,\s*(-?\d*(?:\.\d+)?%)\s*(?:,\s*(-?\d*(?:\.\d+)?%?)\s*)?\)|rgba?\(\s*(-?\d*(?:\.\d+)?)\s+(-?\d*(?:\.\d+)?)\s+(-?\d*(?:\.\d+)?)\s*(?:\s*\/\s*(-?\d*(?:\.\d+)?%?)\s*)?\)|rgba?\(\s*(-?\d*(?:\.\d+)?%)\s+(-?\d*(?:\.\d+)?%)\s+(-?\d*(?:\.\d+)?%)\s*(?:\s*\/\s*(-?\d*(?:\.\d+)?%?)\s*)?\)|\baliceblue\b|\bantiquewhite\b|\baqua\b|\baquamarine\b|\bazure\b|\bbeige\b|\bbisque\b|\bblack\b|\bblanchedalmond\b|\bblue\b|\bblueviolet\b|\bbrown\b|\bburlywood\b|\bcadetblue\b|\bchartreuse\b|\bchocolate\b|\bcoral\b|\bcornflowerblue\b|\bcornsilk\b|\bcrimson\b|\bcyan\b|\bdarkblue\b|\bdarkcyan\b|\bdarkgoldenrod\b|\bdarkgray\b|\bdarkgrey\b|\bdarkgreen\b|\bdarkkhaki\b|\bdarkmagenta\b|\bdarkolivegreen\b|\bdarkorange\b|\bdarkorchid\b|\bdarkred\b|\bdarksalmon\b|\bdarkseagreen\b|\bdarkslateblue\b|\bdarkslategray\b|\bdarkslategrey\b|\bdarkturquoise\b|\bdarkviolet\b|\bdeeppink\b|\bdeepskyblue\b|\bdimgray\b|\bdimgrey\b|\bdodgerblue\b|\bfirebrick\b|\bfloralwhite\b|\bforestgreen\b|\bfuchsia\b|\bgainsboro\b|\bghostwhite\b|\bgold\b|\bgoldenrod\b|\bgray\b|\bgrey\b|\bgreen\b|\bgreenyellow\b|\bhoneydew\b|\bhotpink\b|\bindianred\b|\bindigo\b|\bivory\b|\bkhaki\b|\blavender\b|\blavenderblush\b|\blawngreen\b|\blemonchiffon\b|\blightblue\b|\blightcoral\b|\blightcyan\b|\blightgoldenrodyellow\b|\blightgray\b|\blightgrey\b|\blightgreen\b|\blightpink\b|\blightsalmon\b|\blightseagreen\b|\blightskyblue\b|\blightslategray\b|\blightslategrey\b|\blightsteelblue\b|\blightyellow\b|\blime\b|\blimegreen\b|\blinen\b|\bmagenta\b|\bmaroon\b|\bmediumaquamarine\b|\bmediumblue\b|\bmediumorchid\b|\bmediumpurple\b|\bmediumseagreen\b|\bmediumslateblue\b|\bmediumspringgreen\b|\bmediumturquoise\b|\bmediumvioletred\b|\bmidnightblue\b|\bmintcream\b|\bmistyrose\b|\bmoccasin\b|\bnavajowhite\b|\bnavy\b|\boldlace\b|\bolive\b|\bolivedrab\b|\borange\b|\borangered\b|\borchid\b|\bpalegoldenrod\b|\bpalegreen\b|\bpaleturquoise\b|\bpalevioletred\b|\bpapayawhip\b|\bpeachpuff\b|\bperu\b|\bpink\b|\bplum\b|\bpowderblue\b|\bpurple\b|\brebeccapurple\b|\bred\b|\brosybrown\b|\broyalblue\b|\bsaddlebrown\b|\bsalmon\b|\bsandybrown\b|\bseagreen\b|\bseashell\b|\bsienna\b|\bsilver\b|\bskyblue\b|\bslateblue\b|\bslategray\b|\bslategrey\b|\bsnow\b|\bspringgreen\b|\bsteelblue\b|\btan\b|\bteal\b|\bthistle\b|\btomato\b|\bturquoise\b|\bviolet\b|\bwheat\b|\bwhite\b|\bwhitesmoke\b|\byellow\b|\byellowgreen\b|\btransparent\b/gi);
-		return Array.from(matches).map(match => {
-			const t = match[0];
-			const length = t.length;
-			let type: string;
+        const range = new vscode.Range(
+            charToPosition(document, match.index),
+            charToPosition(document, match.index + length)
+        );
 
-			if (t.startsWith('hsl(')) { type = "hsl"; }
-			else if (t.startsWith('hsla(')) { type = "hsla"; }
-			else if (t.startsWith('rgb(')) { type = "rgb"; }
-			else if (t.startsWith('rgba(')) { type = "rgba"; }
-			else if (t.startsWith('#')) { type = "hex"; }
-			else { type = "string"; }
+        let colour = identifyColour(match[0]);
+        console.log("colour:", match[0], colour, "range:", range);
 
-			const range = new vscode.Range(
-				getPos(text, match.index),
-				getPos(text, match.index + t.length)
-			);
-
-			const col = parseColorString(t);
-
-
-
-			if (col) {
-				return {
-					color: col,
-					type,
-					length,
-					range
-				} as Match;
-			}
-		});
-
-
-
-	}
+        return {
+            ...colour, range, length
+        };
+    });
 }
 
+function r(c: vscode.Color) {
+    return c.red.toFixed(3).replace(/0+$/, "");
+}
+function r8(c: vscode.Color) {
+    return Math.round(c.red * 255);
+}
+
+function g(c: vscode.Color) {
+    return c.green.toFixed(3).replace(/0+$/, "");
+}
+function g8(c: vscode.Color) {
+    return Math.round(c.green * 255);
+}
+
+function b(c: vscode.Color) {
+    return c.blue.toFixed(3).replace(/0+$/, "");
+}
+function b8(c: vscode.Color) {
+    return Math.round(c.blue * 255);
+}
+
+function a(c: vscode.Color) {
+    return c.alpha.toFixed(3).replace(/0+$/, "");
+}
+function a8(c: vscode.Color) {
+    return Math.round(c.alpha * 255);
+}
 
 
 class Picker {
+    constructor() {
+        this.register();
+    }
 
-	constructor() {
-		let subscriptions: vscode.Disposable[] = [];
-		vscode.workspace.onDidChangeTextDocument(this._onDidChangeTextDocument, this, subscriptions);
-		vscode.workspace.onDidChangeConfiguration(this._onDidChangeConfiguration, this, subscriptions);
-		this.register();
-	}
+    private register() {
+        vscode.languages.registerColorProvider("rust", {
+            provideDocumentColors(document: vscode.TextDocument, _: vscode.CancellationToken) {
+                const matches = getMatches(document.getText());
+                if (matches.length === 0) {
+                    console.log("No matches");
+                    return [];
+                }
+                let matched = matches.map((match) => new vscode.ColorInformation(
+                    match.range,
+                    match.colour,
+                ));
+                console.log("found", matched);
+                return matched;
+            },
+            provideColorPresentations(c, context, _) {
+                const colString = context.document.getText(context.range);
+                let kind = identifyColour(colString);
+                let prefix = kind.isColour ? "Colour::" : "Color::";
+                switch (kind.type) {
+                    case "rgba":
+                        return [new vscode.ColorPresentation(
+                            `${prefix}srgba(${r(c)}, ${g(c)}, ${b(c)}, ${a(c)})`
+                        )];
+                    case "rgb":
+                        return [new vscode.ColorPresentation(
+                            `${prefix}srgb(${r(c)}, ${g(c)}, ${b(c)})`
+                        )];
+                    case "rgba_u8":
+                        return [new vscode.ColorPresentation(
+                            `${prefix}srgba_u8(${r8(c)}, ${g8(c)}, ${b8(c)}, ${a8(c)})`
+                        )];
+                    case "rgb_u8":
+                        return [new vscode.ColorPresentation(
+                            `${prefix}srgb_u8(${r8(c)}, ${g8(c)}, ${b8(c)})`
+                        )];
+                }
+            }
+        });
+    }
 
-
-	private get languages() {
-		return vscode.workspace.getConfiguration('vscode-color-picker').get('languages') as Array<string>;
-	}
-
-	private _onDidChangeTextDocument(e: vscode.TextDocumentChangeEvent) {
-		const editor = vscode.window.activeTextEditor;
-		const document = e.document;
-		const text = document.getText();
-	}
-
-	private _onDidChangeConfiguration() {
-
-	}
-
-	private register() {
-		this.languages.forEach(language => {
-			vscode.languages.registerColorProvider(language, {
-				provideDocumentColors(document: vscode.TextDocument, token: vscode.CancellationToken) {
-					const matches = Matcher.getMatches(document.getText());
-					return matches.map((match) => new vscode.ColorInformation(
-						match.range,
-						match.color
-					));
-
-				},
-				provideColorPresentations(color, context, token) {
-					const c = Color.fromRgb(color.red * 255, color.green * 255, color.blue * 255);
-					c.alpha = color.alpha;
-					const colString = context.document.getText(context.range);
-
-					const presentationHex = new vscode.ColorPresentation(c.toString('hex'));
-					const presentationHexa = new vscode.ColorPresentation(c.toString('hexa'));
-					const presentationHsl = new vscode.ColorPresentation(c.toString('hsl'));
-					const presentationHsla = new vscode.ColorPresentation(c.toString('hsla'));
-					const presentationRgb = new vscode.ColorPresentation(c.toString('rgb'));
-					const presentationRgba = new vscode.ColorPresentation(c.toString('rgba'));
-
-					let withAlpha = [
-						presentationHexa,
-						presentationHsla,
-						presentationRgba
-					];
-
-					let withoutAlpha = [
-						presentationHex,
-						presentationHsl,
-						presentationRgb
-					];
-
-					const parsed = parse(colString);
-
-					if (colString.startsWith("#") && parsed.alpha !== 1) {
-						withAlpha = [
-							presentationHexa,
-							presentationHsla,
-							presentationRgba
-						];
-						// type = "hexa";
-
-					}
-					else if (colString.startsWith("#")) {
-						withoutAlpha = [
-							presentationHex,
-							presentationHsl,
-							presentationRgb,
-						];
-						// type = "hex";
-
-					}
-					else if ((parsed.type === "rgb" && parsed.alpha !== 1) || parsed.type === "rgba") {
-						withAlpha = [
-							presentationRgba,
-							presentationHexa,
-							presentationHsla,
-						];
-						// type = "rgba";
-
-					}
-					else if (parsed.type === "rgb" || parsed.type === "rgba") {
-						withoutAlpha = [
-							presentationRgb,
-							presentationHex,
-							presentationHsl,
-						];
-						// type = "rgb";
-
-					}
-					else if ((parsed.type === "hsl" && parsed.alpha !== 1) || parsed.type === "hsla") {
-						withAlpha = [
-							presentationHsla,
-							presentationRgba,
-							presentationHexa,
-						];
-						// type = "hsla";
-
-					}
-					else if (parsed.type === "hsl" || parsed.type === "hsla") {
-						withoutAlpha = [
-							presentationHsl,
-							presentationRgb,
-							presentationHex,
-						];
-						// type = "hsl";
-					}
-
-
-					return c.alpha !== 1 ? withAlpha : withoutAlpha;
-				}
-			});
-		});
-	}
-
-	dispose() { }
+    dispose() {}
 }
 
 
 
 export function activate(context: vscode.ExtensionContext) {
-	const picker = new Picker();
-	context.subscriptions.push(picker);
+    const picker = new Picker();
+    context.subscriptions.push(picker);
 }
 
 // this method is called when your extension is deactivated
-export function deactivate() { }
+export function deactivate() {}

@@ -1,32 +1,14 @@
-# VSCode Color Picker
+# VSCode Bevy Colour
 
-A simple Color picker for vscode that lets you use vscode's css color picker in other documents
+Lets you use VSCode's built-in colour picker with Bevy's colour constructors.
 
-![color-picker-preview](https://github.com/Markos-Th09/vscode-color-picker/raw/main/showcase.png "color-picker-preview")
+Uses a simple text match, looking for either `Color::` or `Colour::` followed by one of the following constructors:
 
-* To make it work for your preferred language, just add a `vscode-color-picker.languages` entry in settings.json, with VSCode's identifier string for the language, in the list. For ex.
-  ```json
-    "color-picker.languages": [
-        "python",
-        "javascript",
-        "typescript"
-    ],
-    ...
-  ```
- and then make sure to reload the window for the service to be intialized properly.
-
-### How do i stop it from running in languages i don't want it in?
-
-Just remove the language entry from `color-picker.languages` in settings.json.
-
-
-### What are the languages i can add to the extension?
-
-A list of VSCode's language identifiers is available [here](https://code.visualstudio.com/docs/languages/identifiers).
-
-
-### What types of strings are recognized colors?
-
-Every valid css color should work.
-
- 
+- `rgba`
+- `srgba`
+- `rgb`
+- `srgb`
+- `rgba_u8`
+- `srgba_u8`
+- `rgb_u8`
+- `srgb_u8`

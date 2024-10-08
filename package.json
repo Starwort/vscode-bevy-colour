@@ -1,13 +1,13 @@
 {
-  "name": "color-picker",
-  "displayName": "VSCode Color Picker",
+  "name": "bevy-colour",
+  "displayName": "VSCode Bevy Colour Picker",
   "icon": "icon.png",
-  "publisher": "MarkosTh09",
-  "description": "let's you use vscode's css color picker in other documents",
+  "publisher": "Starwort",
+  "description": "Lets you use VSCode's built-in colour picker with Bevy's colour constructors",
   "version": "1.0.0",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Markos-Th09/vscode-color-picker.git"
+    "url": "https://github.com/Starwort/bevy-colour.git"
   },
   "license": "MIT",
   "engines": {
@@ -20,26 +20,6 @@
     "onStartupFinished"
   ],
   "main": "./dist/extension.js",
-  "contributes": {
-    "configuration": {
-      "title": "vscode-color-picker",
-      "properties": {
-        "vscode-color-picker.languages": {
-          "type": "array",
-          "default": [
-            "javascript",
-            "javascriptreact",
-            "typescript",
-            "typescriptreact",
-            "postcss",
-            "xml",
-            "html"
-          ],
-          "description": "Set languages to be detected by the extension"
-        }
-      }
-    }
-  },
   "capabilities": {
     "colorProvider": "true"
   },
