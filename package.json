@@ -4,7 +4,7 @@
   "icon": "icon.png",
   "publisher": "Starwort",
   "description": "Lets you use VSCode's built-in colour picker with Bevy's colour constructors",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/Starwort/bevy-colour.git"
@@ -22,6 +22,52 @@
   "main": "./dist/extension.js",
   "capabilities": {
     "colorProvider": "true"
+  },
+  "contributes": {
+    "configuration": {
+      "title": "Bevy Colour Picker",
+      "properties": {
+        "bevy-colour.alphaConversions": {
+          "type": "string",
+          "default": "auto",
+          "enum": [
+            "auto",
+            "always",
+            "never"
+          ],
+          "enumItemLabels": [
+            "Auto",
+            "Always",
+            "Never"
+          ],
+          "enumDescriptions": [
+            "Convert between srgba and srgb automatically",
+            "Always use srgba",
+            "Never convert (opacity slider will have no effect on srgb colours)"
+          ]
+        },
+        "bevy-colour.preferredNumberType": {
+          "type": "string",
+          "default": "preserve",
+          "enum": [
+            "preserve",
+            "f32",
+            "u8"
+          ],
+          "enumItemLabels": [
+            "Preserve",
+            "Floating point",
+            "Integer"
+          ],
+          "enumDescriptions": [
+            "Preserve the number type",
+            "Convert to floating point colour",
+            "Convert to integer colour"
+          ],
+          "description": "Whether to automatically convert between different number types"
+        }
+      }
+    }
   },
   "scripts": {
     "vscode:prepublish": "bun run package",

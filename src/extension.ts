@@ -64,16 +64,16 @@ function identifyColour(colour: string) {
                 colour: new vscode.Color(+match[6], +match[7], +match[8], 1),
                 isColour,
             };
-        case match[10] !== undefined:
+        case match[9] !== undefined:
             return {
                 type: "rgba_u8",
-                colour: new vscode.Color(+match[10] / 255, +match[11] / 255, +match[12] / 255, +match[13] / 255),
+                colour: new vscode.Color(+match[9] / 255, +match[10] / 255, +match[11] / 255, +match[12] / 255),
                 isColour,
             };
-        case match[14] !== undefined:
+        case match[13] !== undefined:
             return {
                 type: "rgb_u8",
-                colour: new vscode.Color(+match[14] / 255, +match[15] / 255, +match[16] / 255, 1),
+                colour: new vscode.Color(+match[13] / 255, +match[14] / 255, +match[15] / 255, 1),
                 isColour,
             };
     }
@@ -151,6 +151,27 @@ class Picker {
                 const colString = context.document.getText(context.range);
                 let kind = identifyColour(colString);
                 let prefix = kind.isColour ? "Colour::" : "Color::";
+                const config = vscode.workspace.getConfiguration('bevy-colour');
+                switch (config.get("preferredNumberType")) {
+                    case "preserve":
+                        break;
+                    case "f32":
+                        kind.type = kind.type.replace("_u8", "");
+                        break;
+                    case "u8":
+                        kind.type = kind.type.replace("_u8", "") + "_u8";
+                        break;
+                }
+                switch (config.get("alphaConversion")) {
+                    case "auto":
+                        kind.type = kind.type.replace(/rgba?/, c.alpha === 1 ? "rgb" : "rgba");
+                        break;
+                    case "always":
+                        kind.type = kind.type.replace(/rgba?/, "rgba");
+                        break;
+                    case "never":
+                        break;
+                }
                 switch (kind.type) {
                     case "rgba":
                         return [new vscode.ColorPresentation(
